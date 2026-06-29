@@ -6,6 +6,7 @@ public partial class AirportPicker
 {
     [Parameter] public Guid SelectedAirportId { get; set; }
     [Parameter] public EventCallback<Guid> SelectedAirportIdChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
 
     [AutoInject] private IAirportController airportController = default!;
 
@@ -48,10 +49,15 @@ public partial class AirportPicker
 
     private void OnAirportChanged(string? airportId)
     {
-        if (string.IsNullOrEmpty(airportId) || Guid.TryParse(airportId, out var id) is false)
-            return;
-
         selectedValue = airportId;
+
+        if (string.IsNullOrEmpty(airportId) || Guid.TryParse(airportId, out var id) is false)
+        {
+            SelectedAirportId = Guid.Empty;
+            _ = SelectedAirportIdChanged.InvokeAsync(Guid.Empty);
+            return;
+        }
+
         SelectedAirportId = id;
         _ = SelectedAirportIdChanged.InvokeAsync(id);
     }

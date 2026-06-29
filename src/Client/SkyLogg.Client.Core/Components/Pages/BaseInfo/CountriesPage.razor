@@ -1,0 +1,79 @@
+@attribute [Route(PageUrls.BaseInfoCountries)]
+@attribute [Route("{culture?}" + PageUrls.BaseInfoCountries)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.BaseInfo.ManageCountries)]
+@inherits BaseInfoPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.Countries)]"
+             PageTitle="@Localizer[nameof(AppStrings.CountriesPageTitle)]" />
+
+<section>
+    <BitStack Gap="1rem">
+        <EditForm Model="editingCountry" FormName="BaseInfoCountryForm" OnValidSubmit="WrapHandled(SaveCountry)">
+            <DataAnnotationsValidator />
+            <BitCard Style="padding:1rem" FullWidth>
+                <BitStack Gap="1rem">
+                    <BitText Typography="BitTypography.H6">
+                        @(editingCountry.Id == Guid.Empty ? Localizer[nameof(AppStrings.AddCountry)] : Localizer[nameof(AppStrings.UpdateCountry)])
+                    </BitText>
+                    <BitStack Horizontal Wrap Gap="1rem">
+                        <BitTextField @bind-Value="editingCountry.Name" Name="CountryName" Label="@Localizer[nameof(AppStrings.Country)]" />
+                        <BitTextField @bind-Value="editingCountry.Iso2" Name="CountryIso2" Label="@Localizer[nameof(AppStrings.Iso2)]" MaxLength="2" />
+                        <BitTextField @bind-Value="editingCountry.Iso3" Name="CountryIso3" Label="@Localizer[nameof(AppStrings.Iso3)]" MaxLength="3" />
+                    </BitStack>
+                    <BitStack Horizontal Gap="0.5rem">
+                        <BitButton ButtonType="BitButtonType.Submit" Color="BitColor.Primary" IsLoading="isSaving">
+                            @(editingCountry.Id == Guid.Empty ? Localizer[nameof(AppStrings.Add)] : Localizer[nameof(AppStrings.Update)])
+                        </BitButton>
+                        <BitButton ButtonType="BitButtonType.Button" Variant="BitVariant.Outline" OnClick="WrapHandled(RequestResetForm)">
+                            @Localizer[nameof(AppStrings.Cancel)]
+                        </BitButton>
+                    </BitStack>
+                </BitStack>
+            </BitCard>
+        </EditForm>
+
+        <BitSearchBox @bind-Value="searchText"
+                      Placeholder="@Localizer[nameof(AppStrings.SearchCountriesPlaceholder)]"
+                      OnChange="WrapHandled(SearchCountries)"
+                      Immediate DebounceTime="300" />
+
+        @if (isLoading)
+        {
+            <BitRippleLoading />
+        }
+        else if (countries.Count == 0)
+        {
+            <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoCountries)]</BitMessage>
+        }
+        else
+        {
+            @foreach (var country in countries)
+            {
+                <BitCard Style="padding:1rem" FullWidth>
+                    <BitStack Horizontal Wrap HorizontalAlign="BitAlignment.SpaceBetween" Gap="1rem">
+                        <BitStack Gap="0.25rem">
+                            <BitText Typography="BitTypography.Subtitle1">@country.DisplayName</BitText>
+                            <BitText Typography="BitTypography.Body2">@country.Iso2 / @country.Iso3</BitText>
+                        </BitStack>
+                        <BitStack Horizontal Gap="0.5rem">
+                            <BitButton IconName="@BitIconName.Edit" Variant="BitVariant.Outline" OnClick="WrapHandled(() => EditCountry(country))">
+                                @Localizer[nameof(AppStrings.Edit)]
+                            </BitButton>
+                            <BitButton IconName="@BitIconName.Delete" Color="BitColor.Error" Variant="BitVariant.Outline" OnClick="WrapHandled(() => ConfirmDeleteCountry(country))">
+                                @Localizer[nameof(AppStrings.Delete)]
+                            </BitButton>
+                        </BitStack>
+                    </BitStack>
+                </BitCard>
+            }
+        }
+    </BitStack>
+</section>
+
+<BaseInfoConfirmDialogs @bind-IsDeleteDialogOpen="isDeleteDialogOpen"
+                        DeleteMessage="@Localizer.GetString(nameof(AppStrings.AreYouSureWannaDelete), deleteTargetName ?? string.Empty)"
+                        DeleteConfirmed="WrapHandled(DeleteCountryConfirmed)"
+                        DeleteCanceled="WrapHandled(HandleDeleteCanceled)"
+                        @bind-IsDiscardDialogOpen="isDiscardDialogOpen"
+                        DiscardConfirmed="WrapHandled(HandleDiscardConfirmed)" />

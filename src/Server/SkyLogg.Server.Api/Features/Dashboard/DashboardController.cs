@@ -17,7 +17,7 @@ public partial class DashboardController : AppControllerBase, IDashboardControll
         return new OverallAnalyticsStatsDataResponseDto
         {
             TotalFlightLogs = await DbContext.FlightLogs.CountAsync(f => f.UserId == userId && !f.Deleted, cancellationToken),
-            TotalAircraft = await DbContext.Aircrafts.CountAsync(a => a.IsActive, cancellationToken),
+            TotalAircraft = await DbContext.Aircrafts.CountAsync(a => !a.IsArchived, cancellationToken),
             Last30DaysFlightCount = await DbContext.FlightLogs.CountAsync(f => f.UserId == userId && !f.Deleted && f.FlightDate >= last30Days, cancellationToken),
             TotalBlockMinutes = await DbContext.FlightLogs.Where(f => f.UserId == userId && !f.Deleted).SumAsync(f => f.TotalBlockMinutes, cancellationToken),
         };

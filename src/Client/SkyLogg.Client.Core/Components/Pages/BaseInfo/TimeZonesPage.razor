@@ -1,0 +1,79 @@
+@attribute [Route(PageUrls.BaseInfoTimeZones)]
+@attribute [Route("{culture?}" + PageUrls.BaseInfoTimeZones)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.BaseInfo.ManageTimeZones)]
+@inherits BaseInfoPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.TimeZones)]"
+             PageTitle="@Localizer[nameof(AppStrings.TimeZonesPageTitle)]" />
+
+<section>
+    <BitStack Gap="1rem">
+        <EditForm Model="editingTimeZone" FormName="BaseInfoTimeZoneForm" OnValidSubmit="WrapHandled(SaveTimeZone)">
+            <DataAnnotationsValidator />
+            <BitCard Style="padding:1rem" FullWidth>
+                <BitStack Gap="1rem">
+                    <BitText Typography="BitTypography.H6">
+                        @(editingTimeZone.Id == Guid.Empty ? Localizer[nameof(AppStrings.AddTimeZone)] : Localizer[nameof(AppStrings.UpdateTimeZone)])
+                    </BitText>
+                    <BitStack Horizontal Wrap Gap="1rem">
+                        <BitTextField @bind-Value="editingTimeZone.IanaId" Name="TimeZoneIanaId" Label="@Localizer[nameof(AppStrings.IanaTimeZoneId)]" />
+                        <BitTextField @bind-Value="editingTimeZone.DisplayName" Name="TimeZoneDisplayName" Label="@Localizer[nameof(AppStrings.TimeZoneDisplayName)]" />
+                        <BitTextField @bind-Value="editingTimeZone.UtcOffset" Name="TimeZoneUtcOffset" Label="@Localizer[nameof(AppStrings.UtcOffset)]" MaxLength="10" />
+                    </BitStack>
+                    <BitStack Horizontal Gap="0.5rem">
+                        <BitButton ButtonType="BitButtonType.Submit" Color="BitColor.Primary" IsLoading="isSaving">
+                            @(editingTimeZone.Id == Guid.Empty ? Localizer[nameof(AppStrings.Add)] : Localizer[nameof(AppStrings.Update)])
+                        </BitButton>
+                        <BitButton ButtonType="BitButtonType.Button" Variant="BitVariant.Outline" OnClick="WrapHandled(RequestResetForm)">
+                            @Localizer[nameof(AppStrings.Cancel)]
+                        </BitButton>
+                    </BitStack>
+                </BitStack>
+            </BitCard>
+        </EditForm>
+
+        <BitSearchBox @bind-Value="searchText"
+                      Placeholder="@Localizer[nameof(AppStrings.SearchTimeZonesPlaceholder)]"
+                      OnChange="WrapHandled(SearchTimeZones)"
+                      Immediate DebounceTime="300" />
+
+        @if (isLoading)
+        {
+            <BitRippleLoading />
+        }
+        else if (timeZones.Count == 0)
+        {
+            <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoTimeZones)]</BitMessage>
+        }
+        else
+        {
+            @foreach (var timeZone in timeZones)
+            {
+                <BitCard Style="padding:1rem" FullWidth>
+                    <BitStack Horizontal Wrap HorizontalAlign="BitAlignment.SpaceBetween" Gap="1rem">
+                        <BitStack Gap="0.25rem">
+                            <BitText Typography="BitTypography.Subtitle1">@timeZone.Label</BitText>
+                            <BitText Typography="BitTypography.Body2">@timeZone.IanaId</BitText>
+                        </BitStack>
+                        <BitStack Horizontal Gap="0.5rem">
+                            <BitButton IconName="@BitIconName.Edit" Variant="BitVariant.Outline" OnClick="WrapHandled(() => EditTimeZone(timeZone))">
+                                @Localizer[nameof(AppStrings.Edit)]
+                            </BitButton>
+                            <BitButton IconName="@BitIconName.Delete" Color="BitColor.Error" Variant="BitVariant.Outline" OnClick="WrapHandled(() => ConfirmDeleteTimeZone(timeZone))">
+                                @Localizer[nameof(AppStrings.Delete)]
+                            </BitButton>
+                        </BitStack>
+                    </BitStack>
+                </BitCard>
+            }
+        }
+    </BitStack>
+</section>
+
+<BaseInfoConfirmDialogs @bind-IsDeleteDialogOpen="isDeleteDialogOpen"
+                        DeleteMessage="@Localizer.GetString(nameof(AppStrings.AreYouSureWannaDelete), deleteTargetName ?? string.Empty)"
+                        DeleteConfirmed="WrapHandled(DeleteTimeZoneConfirmed)"
+                        DeleteCanceled="WrapHandled(HandleDeleteCanceled)"
+                        @bind-IsDiscardDialogOpen="isDiscardDialogOpen"
+                        DiscardConfirmed="WrapHandled(HandleDiscardConfirmed)" />

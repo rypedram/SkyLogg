@@ -1,4 +1,5 @@
-﻿using SkyLogg.Server.Api.Infrastructure.Data;
+﻿using SkyLogg.Server.Api.Features.Logbook;
+using SkyLogg.Server.Api.Infrastructure.Data;
 using SkyLogg.Server.Web.Infrastructure.Services;
 using SkyLogg.Client.Core.Infrastructure.Services.Contracts;
 

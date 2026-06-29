@@ -12,6 +12,7 @@ public partial class FlightMapPage
     private int? monthFilter;
     private Guid? aircraftFilter;
     private string? aircraftFilterValue;
+    private string? loadError;
     private FlightMapDto? mapData;
     private List<BitDropdownItem<string>> aircraftItems = [];
 
@@ -19,12 +20,20 @@ public partial class FlightMapPage
     {
         await base.OnInitAsync();
 
-        var aircraft = await aircraftController.Get(CurrentCancellationToken);
         aircraftItems = [new() { Text = Localizer[nameof(AppStrings.All)], Value = "" }];
-        aircraftItems.AddRange(aircraft
-            .Where(a => a.IsActive)
-            .OrderBy(a => a.Registration)
-            .Select(a => new BitDropdownItem<string> { Text = a.Registration, Value = a.Id.ToString() }));
+
+        try
+        {
+            var aircraft = await aircraftController.Get(CurrentCancellationToken);
+            aircraftItems.AddRange(aircraft
+                .Where(a => a.IsArchived is false)
+                .OrderBy(a => a.Registration)
+                .Select(a => new BitDropdownItem<string> { Text = a.Registration, Value = a.Id.ToString() }));
+        }
+        catch (KnownException e)
+        {
+            SnackBarService.Error(e.Message);
+        }
 
         await LoadMap();
     }
@@ -38,9 +47,23 @@ public partial class FlightMapPage
     private async Task LoadMap()
     {
         isLoading = true;
+        loadError = null;
+
         try
         {
-            mapData = await flightMapController.GetMapData(null, null, aircraftFilter, yearFilter, monthFilter, CurrentCancellationToken);
+            mapData = await flightMapController.GetMapData(
+                null,
+                null,
+                aircraftFilter,
+                GetEffectiveYearFilter(),
+                GetEffectiveMonthFilter(),
+                CurrentCancellationToken);
+        }
+        catch (KnownException e)
+        {
+            loadError = e.Message;
+            mapData = null;
+            SnackBarService.Error(e.Message);
         }
         finally
         {
@@ -48,19 +71,50 @@ public partial class FlightMapPage
         }
     }
 
-    private static string GetPolylinePoints(FlightMapRouteDto route)
+    private int? GetEffectiveYearFilter() => yearFilter is >= 1900 and <= 2100 ? yearFilter : null;
+
+    private int? GetEffectiveMonthFilter() => monthFilter is >= 1 and <= 12 ? monthFilter : null;
+
+    private static IEnumerable<string> GetPolylineSegments(FlightMapRouteDto route)
     {
         var points = route.GreatCirclePoints.Count > 0
             ? route.GreatCirclePoints
             : [new FlightMapPointDto { Latitude = route.DepartureLatitude, Longitude = route.DepartureLongitude },
                new FlightMapPointDto { Latitude = route.ArrivalLatitude, Longitude = route.ArrivalLongitude }];
 
-        return string.Join(" ", points.Select(p => $"{ProjectX(p.Longitude):0.##},{ProjectY(p.Latitude):0.##}"));
+        var projected = points
+            .Select(p => (X: ProjectX(p.Longitude), Y: ProjectY(p.Latitude), Longitude: p.Longitude))
+            .ToList();
+
+        if (projected.Count < 2)
+            yield break;
+
+        var segment = new List<(double X, double Y)>(projected.Count) { (projected[0].X, projected[0].Y) };
+
+        for (var i = 1; i < projected.Count; i++)
+        {
+            if (Math.Abs(projected[i].Longitude - projected[i - 1].Longitude) > 180)
+            {
+                if (segment.Count >= 2)
+                    yield return FormatPolyline(segment);
+
+                segment = [(projected[i].X, projected[i].Y)];
+                continue;
+            }
+
+            segment.Add((projected[i].X, projected[i].Y));
+        }
+
+        if (segment.Count >= 2)
+            yield return FormatPolyline(segment);
     }
 
-    private static double ProjectX(double longitude) => (longitude + 180) * 360 / 360;
+    private static string FormatPolyline(IReadOnlyList<(double X, double Y)> segment) =>
+        string.Join(" ", segment.Select(p => $"{p.X:0.##},{p.Y:0.##}"));
 
-    private static double ProjectY(double latitude) => (90 - latitude) * 180 / 180;
+    private static double ProjectX(double longitude) => longitude + 180;
+
+    private static double ProjectY(double latitude) => 90 - latitude;
 
     private static double AirportRadius(int visitCount) => Math.Clamp(2 + visitCount, 3, 10);
 }

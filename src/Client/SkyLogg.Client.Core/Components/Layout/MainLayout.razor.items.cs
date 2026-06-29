@@ -19,76 +19,137 @@ public partial class MainLayout
             }
         ];
 
-        if (await authorizationService.IsAuthorized(authUser!, AppFeatures.Logbook.ManageFlightLogs))
-        {
-            navPanelItems.AddRange(
-            [
-                new()
-                {
-                    Text = localizer[nameof(AppStrings.LogbookDashboard)],
-                    IconName = BitIconName.Airplane,
-                    Url = PageUrls.Logbook,
-                },
-                new()
-                {
-                    Text = localizer[nameof(AppStrings.FlightLogs)],
-                    IconName = BitIconName.BookAnswers,
-                    Url = PageUrls.FlightLogs,
-                },
-                new()
-                {
-                    Text = localizer[nameof(AppStrings.FlightSummary)],
-                    IconName = BitIconName.BarChartVerticalFill,
-                    Url = PageUrls.FlightSummary,
-                },
-                new()
-                {
-                    Text = localizer[nameof(AppStrings.FlightMap)],
-                    IconName = BitIconName.MapPin,
-                    Url = PageUrls.FlightMap,
-                },
-                new()
-                {
-                    Text = localizer[nameof(AppStrings.FlightImport)],
-                    IconName = BitIconName.Upload,
-                    Url = PageUrls.FlightImport,
-                },
-                new()
-                {
-                    Text = localizer[nameof(AppStrings.Reports)],
-                    IconName = BitIconName.ReportDocument,
-                    Url = PageUrls.FlightReports,
-                },
-            ]);
-        }
+        var (manageAirports, manageAircraft, manageCrew, manageCities, manageCountries, manageTimeZones) = await (
+            authorizationService.IsAuthorized(authUser!, AppFeatures.BaseInfo.ManageAirports),
+            authorizationService.IsAuthorized(authUser!, AppFeatures.BaseInfo.ManageAircraft),
+            authorizationService.IsAuthorized(authUser!, AppFeatures.BaseInfo.ManageCrew),
+            authorizationService.IsAuthorized(authUser!, AppFeatures.BaseInfo.ManageCities),
+            authorizationService.IsAuthorized(authUser!, AppFeatures.BaseInfo.ManageCountries),
+            authorizationService.IsAuthorized(authUser!, AppFeatures.BaseInfo.ManageTimeZones));
 
-        if (await authorizationService.IsAuthorized(authUser!, AppFeatures.Logbook.ManageCrew))
+        if (await authorizationService.IsAuthorized(authUser!, AppFeatures.Logbook.ManageFlightLogs))
         {
             navPanelItems.Add(new()
             {
-                Text = localizer[nameof(AppStrings.CrewMembers)],
-                IconName = BitIconName.People,
-                Url = PageUrls.CrewMembers,
+                Text = localizer[nameof(AppStrings.Logbook)],
+                IconName = BitIconName.AirplaneSolid,
+                ChildItems =
+                [
+                    new()
+                    {
+                        Text = localizer[nameof(AppStrings.LogbookDashboard)],
+                        IconName = BitIconName.ViewDashboard,
+                        Url = PageUrls.Logbook,
+                    },
+                    new()
+                    {
+                        Text = localizer[nameof(AppStrings.FlightLogs)],
+                        IconName = BitIconName.List,
+                        Url = PageUrls.FlightLogs,
+                        AdditionalUrls =
+                        [
+                            PageUrls.AddOrEditFlightLog,
+                            $"{PageUrls.FlightLogDetail}/",
+                        ],
+                    },
+                    new()
+                    {
+                        Text = localizer[nameof(AppStrings.FlightSummary)],
+                        IconName = BitIconName.BarChartVerticalFill,
+                        Url = PageUrls.FlightSummary,
+                    },
+                    new()
+                    {
+                        Text = localizer[nameof(AppStrings.FlightMap)],
+                        IconName = BitIconName.MapPin,
+                        Url = PageUrls.FlightMap,
+                    },
+                    new()
+                    {
+                        Text = localizer[nameof(AppStrings.Reports)],
+                        IconName = BitIconName.ReportDocument,
+                        Url = PageUrls.FlightReports,
+                    },
+                    new()
+                    {
+                        Text = localizer[nameof(AppStrings.FlightImport)],
+                        IconName = BitIconName.Upload,
+                        Url = PageUrls.FlightImport,
+                    },
+                ],
             });
         }
 
-        if (await authorizationService.IsAuthorized(authUser!, AppFeatures.Logbook.ManageFleet))
+        if (manageAirports || manageAircraft || manageCrew || manageCities || manageCountries || manageTimeZones)
         {
-            navPanelItems.AddRange(
-            [
-                new()
-                {
-                    Text = localizer[nameof(AppStrings.Aircrafts)],
-                    IconName = BitIconName.Airplane,
-                    Url = PageUrls.AircraftList,
-                },
-                new()
+            BitNavItem baseInfoItem = new()
+            {
+                Text = localizer[nameof(AppStrings.BaseInfo)],
+                IconName = BitIconName.Dictionary,
+                ChildItems = []
+            };
+
+            navPanelItems.Add(baseInfoItem);
+
+            if (manageAirports)
+            {
+                baseInfoItem.ChildItems.Add(new()
                 {
                     Text = localizer[nameof(AppStrings.Airports)],
                     IconName = BitIconName.Globe,
-                    Url = PageUrls.Airports,
-                },
-            ]);
+                    Url = PageUrls.BaseInfoAirports,
+                });
+            }
+
+            if (manageCountries)
+            {
+                baseInfoItem.ChildItems.Add(new()
+                {
+                    Text = localizer[nameof(AppStrings.Countries)],
+                    IconName = BitIconName.MapLayers,
+                    Url = PageUrls.BaseInfoCountries,
+                });
+            }
+
+            if (manageTimeZones)
+            {
+                baseInfoItem.ChildItems.Add(new()
+                {
+                    Text = localizer[nameof(AppStrings.TimeZones)],
+                    IconName = BitIconName.WorldClock,
+                    Url = PageUrls.BaseInfoTimeZones,
+                });
+            }
+
+            if (manageCities)
+            {
+                baseInfoItem.ChildItems.Add(new()
+                {
+                    Text = localizer[nameof(AppStrings.Cities)],
+                    IconName = BitIconName.CityNext,
+                    Url = PageUrls.BaseInfoCities,
+                });
+            }
+
+            if (manageAircraft)
+            {
+                baseInfoItem.ChildItems.Add(new()
+                {
+                    Text = localizer[nameof(AppStrings.Aircrafts)],
+                    IconName = BitIconName.Airplane,
+                    Url = PageUrls.BaseInfoAircraft,
+                });
+            }
+
+            if (manageCrew)
+            {
+                baseInfoItem.ChildItems.Add(new()
+                {
+                    Text = localizer[nameof(AppStrings.CrewMembers)],
+                    IconName = BitIconName.People,
+                    Url = PageUrls.BaseInfoCrew,
+                });
+            }
         }
 
         if (await authorizationService.IsAuthorized(authUser!, AppFeatures.AdminPanel.Dashboard))

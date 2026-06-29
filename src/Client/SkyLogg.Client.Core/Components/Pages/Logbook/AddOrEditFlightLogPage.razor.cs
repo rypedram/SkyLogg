@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Forms;
 using SkyLogg.Shared.Features.Logbook;
 
 namespace SkyLogg.Client.Core.Components.Pages.Logbook;
@@ -10,6 +11,7 @@ public partial class AddOrEditFlightLogPage
     [AutoInject] private IAircraftController aircraftController = default!;
     [AutoInject] private ICrewMemberController crewMemberController = default!;
 
+    private AppDataAnnotationsValidator? formValidator;
     private bool isSaving;
     private DateTimeOffset? flightDate;
     private FlightLogDto flightLog = new() { Sectors = [new FlightSectorDto()], Crew = [new FlightLogCrewDto { RoleType = CrewRoleType.PIC }] };
@@ -52,12 +54,25 @@ public partial class AddOrEditFlightLogPage
             new() { Text = "Crew", Value = CrewRoleType.Crew.ToString() },
         ];
 
-        aircraft = await aircraftController.Get(CurrentCancellationToken);
+        aircraft = (await aircraftController.Get(CurrentCancellationToken))
+            .Where(a => a.IsArchived is false)
+            .ToList();
         aircraftItems = aircraft.Select(a => new BitDropdownItem<string> { Value = a.Id.ToString(), Text = a.Registration }).ToList();
         aircraftValue = flightLog.AircraftId == Guid.Empty ? null : flightLog.AircraftId.ToString();
 
-        crewMembers = await crewMemberController.Get(CurrentCancellationToken);
-        crewItems = crewMembers.Select(c => new BitDropdownItem<string> { Value = c.Id.ToString(), Text = c.Name }).ToList();
+        crewMembers = (await crewMemberController.Get(CurrentCancellationToken))
+            .Where(c => c.IsArchived is false)
+            .ToList();
+        crewItems = crewMembers.Select(c => new BitDropdownItem<string> { Value = c.Id.ToString(), Text = c.FullName }).ToList();
+
+        if (!Id.HasValue && aircraft.Count == 1)
+        {
+            flightLog.AircraftId = aircraft[0].Id;
+            aircraftValue = aircraft[0].Id.ToString();
+        }
+
+        if (!Id.HasValue && crewMembers.Count == 1)
+            flightLog.Crew[0].CrewMemberId = crewMembers[0].Id;
 
         if (Id.HasValue)
         {
@@ -188,15 +203,27 @@ public partial class AddOrEditFlightLogPage
 
     private void OnAircraftChanged(string? value)
     {
-        if (Guid.TryParse(value, out var id))
-            flightLog.AircraftId = id;
         aircraftValue = value;
+        flightLog.AircraftId = Guid.TryParse(value, out var id) ? id : Guid.Empty;
     }
 
     private void OnCrewChanged(int index, string? value)
     {
-        if (Guid.TryParse(value, out var id))
-            flightLog.Crew[index].CrewMemberId = id;
+        flightLog.Crew[index].CrewMemberId = Guid.TryParse(value, out var id) ? id : Guid.Empty;
+    }
+
+    private void SetSectorDepartureAirport(int index, Guid airportId) =>
+        flightLog.Sectors[index].DepartureAirportId = airportId;
+
+    private void SetSectorArrivalAirport(int index, Guid airportId) =>
+        flightLog.Sectors[index].ArrivalAirportId = airportId;
+
+    private async Task HandleSaveClick()
+    {
+        if (formValidator?.EditContext is EditContext context)
+            await SubmitForm(context);
+        else
+            await Save();
     }
 
     private void OnRoleChanged(int index, string? value)
@@ -205,10 +232,37 @@ public partial class AddOrEditFlightLogPage
             flightLog.Crew[index].RoleType = role;
     }
 
-    private void ApplyFlightDateToModel()
+    private void PrepareFormModel()
     {
         if (flightDate.HasValue)
             flightLog.FlightDate = DateOnly.FromDateTime(flightDate.Value.Date);
+
+        RecalculateTimes();
+        flightLog.TotalBlockMinutes = totalBlockMinutes;
+        flightLog.TotalFlightMinutes = totalFlightMinutes;
+        flightLog.TotalPicMinutes = totalPicMinutes;
+        flightLog.TotalSicMinutes = totalSicMinutes;
+        flightLog.TotalDualMinutes = totalDualMinutes;
+        flightLog.TotalNightMinutes = totalNightMinutes;
+        flightLog.TotalIfrMinutes = totalIfrMinutes;
+        flightLog.TotalLandings = totalLandings;
+    }
+
+    private async Task SubmitForm(EditContext context)
+    {
+        PrepareFormModel();
+
+        if (context.Validate() is false)
+        {
+            var message = string.Join(' ', context.GetValidationMessages());
+            SnackBarService.Error(string.IsNullOrWhiteSpace(message)
+                ? Localizer[nameof(AppStrings.RequiredAttribute_ValidationError)]
+                : message);
+
+            return;
+        }
+
+        await Save();
     }
 
     private async Task Save()
@@ -216,23 +270,23 @@ public partial class AddOrEditFlightLogPage
         isSaving = true;
         try
         {
-            ApplyFlightDateToModel();
-            RecalculateTimes();
-            flightLog.TotalBlockMinutes = totalBlockMinutes;
-            flightLog.TotalFlightMinutes = totalFlightMinutes;
-            flightLog.TotalPicMinutes = totalPicMinutes;
-            flightLog.TotalSicMinutes = totalSicMinutes;
-            flightLog.TotalDualMinutes = totalDualMinutes;
-            flightLog.TotalNightMinutes = totalNightMinutes;
-            flightLog.TotalIfrMinutes = totalIfrMinutes;
-            flightLog.TotalLandings = totalLandings;
-
             if (Id.HasValue)
                 await flightLogController.Update(flightLog, CurrentCancellationToken);
             else
                 await flightLogController.Create(flightLog, CurrentCancellationToken);
 
             NavigationManager.NavigateTo(PageUrls.FlightLogs);
+        }
+        catch (ResourceValidationException e)
+        {
+            formValidator?.DisplayErrors(e);
+            var message = string.Join(' ', e.Payload.Details.SelectMany(d => d.Errors).Select(err => err.Message));
+            if (string.IsNullOrWhiteSpace(message) is false)
+                SnackBarService.Error(message);
+        }
+        catch (KnownException e)
+        {
+            SnackBarService.Error(e.Message);
         }
         finally
         {

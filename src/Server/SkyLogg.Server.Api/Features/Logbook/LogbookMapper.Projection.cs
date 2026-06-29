@@ -4,6 +4,40 @@ namespace SkyLogg.Server.Api.Features.Logbook;
 
 public static partial class LogbookMapper
 {
+    public static IQueryable<AirportDto> Project(this IQueryable<Airport> query)
+    {
+        return query.Select(a => new AirportDto
+        {
+            Id = a.Id,
+            IATA = a.IATA,
+            ICAO = a.ICAO,
+            Name = a.Name,
+            CityId = a.CityId,
+            City = a.CityInfo!.Name,
+            CountryId = a.CountryId,
+            Country = a.Country ?? a.CountryInfo!.Name,
+            TimeZoneDisplay = a.CityInfo!.TimeZone!.DisplayName,
+            Latitude = a.Latitude,
+            Longitude = a.Longitude,
+            ElevationFt = a.ElevationFt,
+            IsArchived = a.IsArchived,
+        });
+    }
+
+    public static IQueryable<CityDto> Project(this IQueryable<City> query)
+    {
+        return query.Select(c => new CityDto
+        {
+            Id = c.Id,
+            Name = c.Name,
+            CountryId = c.CountryId,
+            CountryName = c.CountryInfo!.Name,
+            TimeZoneId = c.TimeZoneId,
+            TimeZoneDisplay = c.TimeZone!.DisplayName,
+            IsArchived = c.IsArchived,
+        });
+    }
+
     public static FlightLogDto MapFull(FlightLog source)
     {
         return new FlightLogDto
@@ -53,7 +87,7 @@ public static partial class LogbookMapper
             Crew = source.CrewAssignments.Select(c => new FlightLogCrewDto
             {
                 CrewMemberId = c.CrewMemberId,
-                CrewMemberName = c.CrewMember?.Name,
+                CrewMemberName = c.CrewMember == null ? null : (c.CrewMember.FirstName + " " + c.CrewMember.LastName).Trim(),
                 RoleType = c.RoleType,
             }).ToList(),
         };
@@ -102,7 +136,7 @@ public static partial class LogbookMapper
             Crew = f.CrewAssignments.Select(c => new FlightLogCrewDto
             {
                 CrewMemberId = c.CrewMemberId,
-                CrewMemberName = c.CrewMember!.Name,
+                CrewMemberName = (c.CrewMember!.FirstName + " " + c.CrewMember.LastName).Trim(),
                 RoleType = c.RoleType,
             }).ToList(),
         });

@@ -21,6 +21,8 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<AircraftType> AircraftTypes { get; set; } = default!;
     public DbSet<Airport> Airports { get; set; } = default!;
     public DbSet<Country> Countries { get; set; } = default!;
+    public DbSet<City> Cities { get; set; } = default!;
+    public DbSet<GeoTimeZone> GeoTimeZones { get; set; } = default!;
     public DbSet<CrewMember> CrewMembers { get; set; } = default!;
     public DbSet<ImportHistory> ImportHistories { get; set; } = default!;
     public DbSet<Achievement> Achievements { get; set; } = default!;

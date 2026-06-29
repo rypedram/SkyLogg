@@ -5,10 +5,13 @@ namespace SkyLogg.Shared.Features.Logbook;
 public interface IAirportController : IAppController
 {
     [HttpGet]
-    Task<PagedResponse<AirportDto>> GetAirports(CancellationToken cancellationToken);
+    Task<List<CountryDto>> GetCountries(CancellationToken cancellationToken);
 
     [HttpGet]
-    Task<List<CountryDto>> GetCountries(CancellationToken cancellationToken);
+    Task<List<CityDto>> GetCities(CancellationToken cancellationToken);
+
+    [HttpGet]
+    Task<PagedResponse<AirportDto>> GetAirports(CancellationToken cancellationToken);
 
     [HttpGet("{searchQuery}")]
     Task<PagedResponse<AirportDto>> SearchAirports(string searchQuery, CancellationToken cancellationToken);

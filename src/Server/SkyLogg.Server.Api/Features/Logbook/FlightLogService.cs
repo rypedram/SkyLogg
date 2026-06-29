@@ -24,12 +24,12 @@ public partial class FlightLogService
             .FirstOrDefaultAsync(a => a.Id == dto.AircraftId, cancellationToken)
             ?? throw new ResourceNotFoundException(localizer[nameof(AppStrings.AircraftCouldNotBeFound)]);
 
-        if (!aircraft.IsActive)
+        if (aircraft.IsArchived)
             throw new BadRequestException(localizer[nameof(AppStrings.AircraftMustBeActive)]);
 
         var crewIds = dto.Crew.Select(c => c.CrewMemberId).Distinct().ToArray();
         var ownedCrewCount = await dbContext.CrewMembers
-            .CountAsync(c => c.UserId == userId && crewIds.Contains(c.Id), cancellationToken);
+            .CountAsync(c => c.UserId == userId && !c.IsArchived && crewIds.Contains(c.Id), cancellationToken);
 
         if (ownedCrewCount != crewIds.Length)
             throw new BadRequestException(localizer[nameof(AppStrings.CrewMemberCouldNotBeFound)]);

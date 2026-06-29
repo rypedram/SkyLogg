@@ -2,8 +2,10 @@
 @inherits AppComponentBase
 
 <BitDropdown Items="airportItems"
+             NoValidate
              FitWidth
              ShowSearchBox
+             Label="@Label"
              Placeholder="@Localizer[nameof(AppStrings.SelectAirport)]"
              Value="@selectedValue"
              OnChange="WrapHandled((string? v) => OnAirportChanged(v))"

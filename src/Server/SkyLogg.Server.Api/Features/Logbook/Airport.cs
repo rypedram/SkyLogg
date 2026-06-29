@@ -1,7 +1,8 @@
+using SkyLogg.Shared.Features.Logbook;
+
 namespace SkyLogg.Server.Api.Features.Logbook;
 
-public partial class Airport
-{
+public partial class Airport : IArchivable{
     public Guid Id { get; set; }
 
     [MaxLength(3)]
@@ -13,6 +14,11 @@ public partial class Airport
     [Required, MaxLength(200)]
     public string? Name { get; set; }
 
+    public Guid CityId { get; set; }
+
+    [ForeignKey(nameof(CityId))]
+    public City? CityInfo { get; set; }
+
     public Guid? CountryId { get; set; }
 
     [ForeignKey(nameof(CountryId))]
@@ -21,14 +27,11 @@ public partial class Airport
     [MaxLength(100)]
     public string? Country { get; set; }
 
-    [MaxLength(100)]
-    public string? City { get; set; }
-
     public double Latitude { get; set; }
 
     public double Longitude { get; set; }
 
     public int? ElevationFt { get; set; }
 
-    public bool IsActive { get; set; } = true;
+    public bool IsArchived { get; set; }
 }

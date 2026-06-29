@@ -1,5 +1,7 @@
 ﻿namespace SkyLogg.Server.Api;
 
+using SkyLogg.Server.Api.Features.Logbook;
+
 public static partial class Program
 {
     public static async Task Main(string[] args)

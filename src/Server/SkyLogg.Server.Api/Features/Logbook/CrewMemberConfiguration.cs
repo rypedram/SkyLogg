@@ -4,7 +4,8 @@ public partial class CrewMemberConfiguration : IEntityTypeConfiguration<CrewMemb
 {
     public void Configure(EntityTypeBuilder<CrewMember> builder)
     {
-        builder.HasIndex(c => new { c.UserId, c.Name });
+        builder.HasIndex(c => new { c.UserId, c.FirstName, c.LastName });
+        builder.HasIndex(c => c.LicenceNumber);
 
         builder.HasOne(c => c.User)
             .WithMany()

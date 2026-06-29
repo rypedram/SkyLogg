@@ -1,0 +1,10 @@
+@import '../../../Styles/abstracts/bit-css-variables';
+
+.flight-map-svg {
+    width: 100%;
+    height: 18rem;
+    border-radius: 1rem;
+    border: 1px solid $bit-color-border-primary;
+    background: $bit-color-background-secondary;
+    color: $bit-color-primary;
+}

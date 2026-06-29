@@ -1,23 +1,32 @@
 using SkyLogg.Shared.Features.Logbook;
 
-namespace SkyLogg.Client.Core.Components.Pages.Logbook;
+namespace SkyLogg.Client.Core.Components.Pages.BaseInfo;
 
-public partial class AircraftsPage
+public partial class AircraftsPage : BaseInfoPageBase
 {
     [AutoInject] private IAircraftController aircraftController = default!;
 
     private bool isLoading;
     private bool isSaving;
+    private string? formSnapshot;
     private string? selectedAircraftTypeValue;
+    private AircraftDto? aircraftPendingDelete;
     private AircraftDto editingAircraft = new();
     private List<AircraftDto> aircraft = [];
     private List<AircraftTypeDto> aircraftTypes = [];
     private List<BitDropdownItem<string>> aircraftTypeItems = [];
 
+    private bool IsFormActive
+    {
+        get => ArchivableFormHelper.GetIsActive(editingAircraft);
+        set => ArchivableFormHelper.SetIsActive(editingAircraft, value);
+    }
+
     protected override async Task OnInitAsync()
     {
         await base.OnInitAsync();
         await LoadData();
+        CaptureFormSnapshot();
     }
 
     private async Task LoadData()
@@ -31,7 +40,7 @@ public partial class AircraftsPage
                 .ToList();
 
             aircraft = (await aircraftController.Get(CurrentCancellationToken))
-                .OrderByDescending(a => a.IsActive)
+                .OrderByDescending(a => !a.IsArchived)
                 .ThenBy(a => a.Registration)
                 .ToList();
         }
@@ -65,10 +74,11 @@ public partial class AircraftsPage
             AircraftTypeDisplay = item.AircraftTypeDisplay,
             Type = item.Type,
             Model = item.Model,
-            IsActive = item.IsActive,
+            IsArchived = item.IsArchived,
             Version = item.Version,
         };
         selectedAircraftTypeValue = editingAircraft.AircraftTypeId?.ToString();
+        CaptureFormSnapshot();
     }
 
     private async Task SaveAircraft()
@@ -81,7 +91,7 @@ public partial class AircraftsPage
             else
                 await aircraftController.Update(editingAircraft, CurrentCancellationToken);
 
-            ResetForm();
+            ResetFormInternal();
             await LoadData();
         }
         finally
@@ -90,15 +100,38 @@ public partial class AircraftsPage
         }
     }
 
-    private async Task DeactivateAircraft(AircraftDto item)
+    private void ConfirmDeleteAircraft(AircraftDto item)
     {
-        await aircraftController.Delete(item.Id, item.Version, CurrentCancellationToken);
+        aircraftPendingDelete = item;
+        OpenDeleteDialog(item.Registration ?? string.Empty);
+    }
+
+    private async Task DeleteAircraftConfirmed()
+    {
+        if (aircraftPendingDelete is null)
+            return;
+
+        await aircraftController.Delete(aircraftPendingDelete.Id, aircraftPendingDelete.Version, CurrentCancellationToken);
+        aircraftPendingDelete = null;
         await LoadData();
     }
 
-    private void ResetForm()
+    private void RequestResetForm() => RequestCancel(HasUnsavedChanges(), ResetFormInternal);
+
+    private void ResetFormInternal()
     {
-        editingAircraft = new AircraftDto { IsActive = true };
+        editingAircraft = new AircraftDto();
         selectedAircraftTypeValue = null;
+        CaptureFormSnapshot();
     }
+
+    private AircraftFormSnapshot CurrentFormState() => new(editingAircraft, selectedAircraftTypeValue);
+
+    private void CaptureFormSnapshot() => formSnapshot = FormStateHelper.Capture(CurrentFormState());
+
+    private bool HasUnsavedChanges() => FormStateHelper.HasChanges(CurrentFormState(), formSnapshot);
+
+    protected override void OnDeleteDialogCanceled() => aircraftPendingDelete = null;
+
+    private record AircraftFormSnapshot(AircraftDto Aircraft, string? AircraftTypeValue);
 }

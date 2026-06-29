@@ -1,6 +1,8 @@
+using SkyLogg.Shared.Features.Logbook;
+
 namespace SkyLogg.Server.Api.Features.Logbook;
 
-public partial class AircraftType
+public partial class AircraftType : IArchivable
 {
     public Guid Id { get; set; }
 
@@ -19,7 +21,7 @@ public partial class AircraftType
     [MaxLength(50)]
     public string? EngineType { get; set; }
 
-    public bool IsActive { get; set; } = true;
+    public bool IsArchived { get; set; }
 
     public long Version { get; set; }
 

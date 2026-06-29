@@ -1269,6 +1269,7 @@ After reaching {0}, extra sign-ins will have reduced functions.</value>
     <value>The provided image does not contain a car.</value>
   </data>
     <data name="Logbook" xml:space="preserve"><value>Logbook</value></data>
+    <data name="BaseInfo" xml:space="preserve"><value>Base Info</value></data>
     <data name="LogbookDashboard" xml:space="preserve"><value>Dashboard</value></data>
     <data name="LogbookDashboardPageTitle" xml:space="preserve"><value>Logbook Dashboard</value></data>
     <data name="FlightLogs" xml:space="preserve"><value>Flight Logs</value></data>
@@ -1297,6 +1298,8 @@ After reaching {0}, extra sign-ins will have reduced functions.</value>
     <data name="VisitedCountries" xml:space="preserve"><value>Visited Countries</value></data>
     <data name="AirportPins" xml:space="preserve"><value>Airport Pins</value></data>
     <data name="MapProvider" xml:space="preserve"><value>Map Provider</value></data>
+    <data name="FlightMapNoRoutes" xml:space="preserve"><value>No routes to display. Set latitude and longitude on airports in Base Info.</value></data>
+    <data name="FlightMapLoadFailed" xml:space="preserve"><value>Could not load flight map data.</value></data>
     <data name="Year" xml:space="preserve"><value>Year</value></data>
     <data name="Month" xml:space="preserve"><value>Month</value></data>
     <data name="AddFlight" xml:space="preserve"><value>Add Flight</value></data>
@@ -1348,7 +1351,52 @@ After reaching {0}, extra sign-ins will have reduced functions.</value>
     <data name="Crew" xml:space="preserve"><value>Crew</value></data>
     <data name="CrewMembers" xml:space="preserve"><value>Crew</value></data>
     <data name="CrewMembersPageTitle" xml:space="preserve"><value>Crew Members</value></data>
+    <data name="NoCrewMembers" xml:space="preserve"><value>No crew members found.</value></data>
     <data name="CrewName" xml:space="preserve"><value>Name</value></data>
+    <data name="FirstName" xml:space="preserve"><value>First name</value></data>
+    <data name="LastName" xml:space="preserve"><value>Last name</value></data>
+    <data name="LicenceNumber" xml:space="preserve"><value>Licence number</value></data>
+    <data name="Birthday" xml:space="preserve"><value>Date of birth</value></data>
+    <data name="CrewPositionType" xml:space="preserve"><value>Crew type</value></data>
+    <data name="SelectCrewPositionType" xml:space="preserve"><value>Select crew type</value></data>
+    <data name="DiscardChanges" xml:space="preserve"><value>Discard changes</value></data>
+    <data name="AreYouSureDiscardChanges" xml:space="preserve"><value>You have unsaved changes. Discard them?</value></data>
+    <data name="Countries" xml:space="preserve"><value>Countries</value></data>
+    <data name="CountriesPageTitle" xml:space="preserve"><value>Country Management</value></data>
+    <data name="AddCountry" xml:space="preserve"><value>Add Country</value></data>
+    <data name="UpdateCountry" xml:space="preserve"><value>Update Country</value></data>
+    <data name="NoCountries" xml:space="preserve"><value>No countries found.</value></data>
+    <data name="SearchCountriesPlaceholder" xml:space="preserve"><value>Search countries...</value></data>
+    <data name="Iso2" xml:space="preserve"><value>ISO 3166-1 alpha-2</value></data>
+    <data name="Iso3" xml:space="preserve"><value>ISO 3166-1 alpha-3</value></data>
+    <data name="CountryIso2AlreadyExists" xml:space="preserve"><value>A country with this ISO alpha-2 code already exists.</value></data>
+    <data name="CountryIso3AlreadyExists" xml:space="preserve"><value>A country with this ISO alpha-3 code already exists.</value></data>
+    <data name="CountryInUseCannotDelete" xml:space="preserve"><value>This country is used by cities or airports and cannot be deleted.</value></data>
+    <data name="Cities" xml:space="preserve"><value>Cities</value></data>
+    <data name="CitiesPageTitle" xml:space="preserve"><value>City Management</value></data>
+    <data name="AddCity" xml:space="preserve"><value>Add City</value></data>
+    <data name="UpdateCity" xml:space="preserve"><value>Update City</value></data>
+    <data name="NoCities" xml:space="preserve"><value>No cities found.</value></data>
+    <data name="SearchCitiesPlaceholder" xml:space="preserve"><value>Search cities...</value></data>
+    <data name="SelectCity" xml:space="preserve"><value>Select city</value></data>
+    <data name="TimeZones" xml:space="preserve"><value>Time zones</value></data>
+    <data name="TimeZonesPageTitle" xml:space="preserve"><value>Time Zone Management</value></data>
+    <data name="AddTimeZone" xml:space="preserve"><value>Add Time Zone</value></data>
+    <data name="UpdateTimeZone" xml:space="preserve"><value>Update Time Zone</value></data>
+    <data name="NoTimeZones" xml:space="preserve"><value>No time zones found.</value></data>
+    <data name="SearchTimeZonesPlaceholder" xml:space="preserve"><value>Search time zones...</value></data>
+    <data name="IanaTimeZoneId" xml:space="preserve"><value>IANA time zone ID</value></data>
+    <data name="TimeZoneDisplayName" xml:space="preserve"><value>Display name</value></data>
+    <data name="TimeZoneIanaAlreadyExists" xml:space="preserve"><value>A time zone with this IANA ID already exists.</value></data>
+    <data name="TimeZoneInUseCannotDelete" xml:space="preserve"><value>This time zone is used by cities and cannot be deleted.</value></data>
+    <data name="SelectTimeZone" xml:space="preserve"><value>Select time zone</value></data>
+    <data name="TimeZone" xml:space="preserve"><value>Time zone</value></data>
+    <data name="UtcOffset" xml:space="preserve"><value>UTC offset</value></data>
+    <data name="CityCouldNotBeFound" xml:space="preserve"><value>City could not be found.</value></data>
+    <data name="TimeZoneCouldNotBeFound" xml:space="preserve"><value>Time zone could not be found.</value></data>
+    <data name="CityAlreadyExists" xml:space="preserve"><value>A city with this name already exists in the selected country.</value></data>
+    <data name="AddCrewMember" xml:space="preserve"><value>Add crew member</value></data>
+    <data name="UpdateCrewMember" xml:space="preserve"><value>Update crew member</value></data>
     <data name="CrewRole" xml:space="preserve"><value>Role</value></data>
     <data name="AddCrew" xml:space="preserve"><value>Add Crew</value></data>
     <data name="Remarks" xml:space="preserve"><value>Remarks</value></data>
@@ -1358,6 +1406,8 @@ After reaching {0}, extra sign-ins will have reduced functions.</value>
     <data name="SearchFlightsPlaceholder" xml:space="preserve"><value>Search flights...</value></data>
     <data name="SearchAirportsPlaceholder" xml:space="preserve"><value>Search airports...</value></data>
     <data name="SelectAirport" xml:space="preserve"><value>Select airport</value></data>
+    <data name="DepartureAirport" xml:space="preserve"><value>Departure airport</value></data>
+    <data name="ArrivalAirport" xml:space="preserve"><value>Arrival airport</value></data>
     <data name="AddAirport" xml:space="preserve"><value>Add Airport</value></data>
     <data name="UpdateAirport" xml:space="preserve"><value>Update Airport</value></data>
     <data name="AirportsPageTitle" xml:space="preserve"><value>Airport Management</value></data>

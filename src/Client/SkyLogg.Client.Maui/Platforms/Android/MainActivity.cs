@@ -19,7 +19,8 @@ namespace SkyLogg.Client.Maui.Platforms.Android;
                             PageUrls.Confirm, PageUrls.ForgotPassword, PageUrls.Settings, PageUrls.ResetPassword, PageUrls.SignIn,
                             PageUrls.SignUp, PageUrls.NotAuthorized, PageUrls.NotFound, PageUrls.Terms, PageUrls.About,
                             PageUrls.Roles, PageUrls.Users,
-                            PageUrls.Logbook, PageUrls.FlightLogs, PageUrls.AddOrEditFlightLog, PageUrls.FlightSummary, PageUrls.Dashboard,
+                            PageUrls.Dashboard,
+                            PageUrls.BaseInfoAirports, PageUrls.BaseInfoAircraft, PageUrls.BaseInfoCrew, PageUrls.BaseInfoCities,
                             ],
                         AutoVerify = true,
                         Categories = [Intent.ActionView, Intent.CategoryDefault, Intent.CategoryBrowsable])]

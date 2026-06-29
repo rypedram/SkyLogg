@@ -48,6 +48,21 @@ public class AppFeatures
         public const string ManageCrew = "5.2";
     }
 
+    public class BaseInfo
+    {
+        public const string ManageAirports = "6.0";
+
+        public const string ManageAircraft = "6.1";
+
+        public const string ManageCrew = "6.2";
+
+        public const string ManageCities = "6.3";
+
+        public const string ManageCountries = "6.4";
+
+        public const string ManageTimeZones = "6.5";
+    }
+
 
     public static (string Name, string Value, Type Group)[] GetAll() => GetSuperAdminFeatures();
 

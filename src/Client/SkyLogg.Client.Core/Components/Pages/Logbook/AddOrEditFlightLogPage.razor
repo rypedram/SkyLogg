@@ -8,8 +8,8 @@
              PageTitle="@Localizer[nameof(AppStrings.FlightLogFormPageTitle)]" />
 
 <section>
-    <EditForm Model="flightLog" FormName="LogbookFlightLogForm" OnValidSubmit="WrapHandled(Save)">
-        <DataAnnotationsValidator />
+    <EditForm Model="flightLog" FormName="LogbookFlightLogForm" novalidate>
+        <AppDataAnnotationsValidator @ref="formValidator" />
         <ValidationSummary />
         <BitStack Gap="1.5rem">
             <BitAccordion Title="@Localizer[nameof(AppStrings.FlightInfo)]">
@@ -24,6 +24,7 @@
             <BitAccordion Title="@Localizer[nameof(AppStrings.Aircraft)]">
                 <BitCard Style="padding:1rem" FullWidth>
                     <BitDropdown Items="aircraftItems"
+                                 NoValidate
                                  Label="@Localizer[nameof(AppStrings.Aircraft)]"
                                  Value="@aircraftValue"
                                  OnChange="WrapHandled((string? v) => OnAircraftChanged(v))" />
@@ -39,8 +40,12 @@
                         <BitCard Style="padding:1rem" FullWidth>
                             <BitStack Gap="1rem">
                                 <BitText Typography="BitTypography.Subtitle1">@Localizer[nameof(AppStrings.Sector)] @(index + 1)</BitText>
-                                <AirportPicker @bind-SelectedAirportId="sector.DepartureAirportId" />
-                                <AirportPicker @bind-SelectedAirportId="sector.ArrivalAirportId" />
+                                <AirportPicker Label="@Localizer[nameof(AppStrings.DepartureAirport)]"
+                                               SelectedAirportId="flightLog.Sectors[index].DepartureAirportId"
+                                               SelectedAirportIdChanged="(id) => SetSectorDepartureAirport(index, id)" />
+                                <AirportPicker Label="@Localizer[nameof(AppStrings.ArrivalAirport)]"
+                                               SelectedAirportId="flightLog.Sectors[index].ArrivalAirportId"
+                                               SelectedAirportIdChanged="(id) => SetSectorArrivalAirport(index, id)" />
                                 @if (flightLog.Sectors.Count > 1)
                                 {
                                     <BitButton ButtonType="BitButtonType.Button" Color="BitColor.Error" Variant="BitVariant.Outline" OnClick="WrapHandled(() => RemoveSector(index))">
@@ -113,10 +118,12 @@
                             var index = i;
                             <BitStack Horizontal Wrap Gap="1rem">
                                 <BitDropdown Items="crewItems"
+                                             NoValidate
                                              Label="@Localizer[nameof(AppStrings.Crew)]"
-                                             Value="@flightLog.Crew[index].CrewMemberId.ToString()"
+                                             Value="@(flightLog.Crew[index].CrewMemberId == Guid.Empty ? null : flightLog.Crew[index].CrewMemberId.ToString())"
                                              OnChange="WrapHandled((string? v) => OnCrewChanged(index, v))" />
                                 <BitDropdown Items="roleItems"
+                                             NoValidate
                                              Label="@Localizer[nameof(AppStrings.CrewRole)]"
                                              Value="@flightLog.Crew[index].RoleType.ToString()"
                                              OnChange="WrapHandled((string? v) => OnRoleChanged(index, v))" />
@@ -158,7 +165,10 @@
                 <BitButton Variant="BitVariant.Outline" Href="@PageUrls.FlightLogs">
                     @Localizer[nameof(AppStrings.Cancel)]
                 </BitButton>
-                <BitButton ButtonType="BitButtonType.Submit" Color="BitColor.Primary" IsLoading="isSaving">
+                <BitButton ButtonType="BitButtonType.Button"
+                           Color="BitColor.Primary"
+                           IsLoading="isSaving"
+                           OnClick="WrapHandled(HandleSaveClick)">
                     @Localizer[nameof(AppStrings.Save)]
                 </BitButton>
             </BitStack>

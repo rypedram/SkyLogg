@@ -1,7 +1,7 @@
 namespace SkyLogg.Shared.Features.Logbook;
 
 [DtoResourceType(typeof(AppStrings))]
-public partial class AircraftDto
+public partial class AircraftDto : IArchivable
 {
     public Guid Id { get; set; }
 
@@ -24,7 +24,7 @@ public partial class AircraftDto
     [Display(Name = nameof(AppStrings.AircraftModel))]
     public string? Model { get; set; }
 
-    public bool IsActive { get; set; } = true;
+    public bool IsArchived { get; set; }
 
     public long Version { get; set; }
 }

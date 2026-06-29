@@ -1,0 +1,52 @@
+@inherits AppComponentBase
+
+<BitDialog IsOpen="IsDeleteDialogOpen"
+           IsOpenChanged="OnDeleteDialogOpenChanged"
+           OnOk="WrapHandled(ConfirmDeleteAsync)"
+           OkText="@Localizer[nameof(AppStrings.Yes)]"
+           CancelText="@Localizer[nameof(AppStrings.No)]"
+           Title="@Localizer[nameof(AppStrings.Delete)]"
+           Message="@DeleteMessage" />
+
+<BitDialog IsOpen="IsDiscardDialogOpen"
+           IsOpenChanged="OnDiscardDialogOpenChanged"
+           OnOk="WrapHandled(ConfirmDiscardAsync)"
+           OkText="@Localizer[nameof(AppStrings.Yes)]"
+           CancelText="@Localizer[nameof(AppStrings.No)]"
+           Title="@Localizer[nameof(AppStrings.DiscardChanges)]"
+           Message="@Localizer[nameof(AppStrings.AreYouSureDiscardChanges)]" />
+
+@code {
+    [Parameter] public bool IsDeleteDialogOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsDeleteDialogOpenChanged { get; set; }
+    [Parameter] public string? DeleteMessage { get; set; }
+    [Parameter] public EventCallback DeleteConfirmed { get; set; }
+    [Parameter] public EventCallback DeleteCanceled { get; set; }
+
+    [Parameter] public bool IsDiscardDialogOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsDiscardDialogOpenChanged { get; set; }
+    [Parameter] public EventCallback DiscardConfirmed { get; set; }
+
+    private async Task OnDeleteDialogOpenChanged(bool isOpen)
+    {
+        await IsDeleteDialogOpenChanged.InvokeAsync(isOpen);
+
+        if (isOpen is false)
+            await DeleteCanceled.InvokeAsync();
+    }
+
+    private async Task OnDiscardDialogOpenChanged(bool isOpen)
+        => await IsDiscardDialogOpenChanged.InvokeAsync(isOpen);
+
+    private async Task ConfirmDeleteAsync()
+    {
+        await IsDeleteDialogOpenChanged.InvokeAsync(false);
+        await DeleteConfirmed.InvokeAsync();
+    }
+
+    private async Task ConfirmDiscardAsync()
+    {
+        await IsDiscardDialogOpenChanged.InvokeAsync(false);
+        await DiscardConfirmed.InvokeAsync();
+    }
+}

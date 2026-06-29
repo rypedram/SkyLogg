@@ -1,7 +1,7 @@
 namespace SkyLogg.Shared.Features.Logbook;
 
 [DtoResourceType(typeof(AppStrings))]
-public partial class AirportDto
+public partial class AirportDto : IArchivable
 {
     public Guid Id { get; set; }
 
@@ -16,13 +16,20 @@ public partial class AirportDto
     [MaxLength(200)]
     public string? Name { get; set; }
 
+    [Required(ErrorMessage = nameof(AppStrings.RequiredAttribute_ValidationError))]
+    [Display(Name = nameof(AppStrings.City))]
+    public Guid CityId { get; set; }
+
+    [MaxLength(150)]
+    public string? City { get; set; }
+
     public Guid? CountryId { get; set; }
 
     [MaxLength(100)]
     public string? Country { get; set; }
 
-    [MaxLength(100)]
-    public string? City { get; set; }
+    [MaxLength(200)]
+    public string? TimeZoneDisplay { get; set; }
 
     [Range(-90, 90)]
     public double Latitude { get; set; }
@@ -32,7 +39,7 @@ public partial class AirportDto
 
     public int? ElevationFt { get; set; }
 
-    public bool IsActive { get; set; } = true;
+    public bool IsArchived { get; set; }
 
     public string DisplayName => string.IsNullOrEmpty(IATA)
         ? $"{ICAO} — {Name}"

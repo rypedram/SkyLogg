@@ -52,6 +52,10 @@ public class FlightLogDtoValidator : AbstractValidator<FlightLogDto>
         RuleFor(f => f.Sectors).NotEmpty().WithMessage(nameof(AppStrings.FlightLogRequiresSector));
         RuleFor(f => f.Crew).NotEmpty().WithMessage(nameof(AppStrings.FlightLogRequiresCrew));
         RuleForEach(f => f.Sectors).SetValidator(new FlightSectorDtoValidator());
+        RuleForEach(f => f.Crew).ChildRules(crew =>
+        {
+            crew.RuleFor(c => c.CrewMemberId).NotEmpty();
+        });
         RuleFor(f => f.Remarks).MaximumLength(2000);
     }
 }

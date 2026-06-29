@@ -6,16 +6,27 @@
         <BitNavBarOption Text="@Localizer[nameof(AppStrings.Home)]" IconName="@BitIconName.Home" Url="@PageUrls.Home" />
 
         <AuthorizeView Policy="@AppFeatures.Logbook.ManageFlightLogs">
-            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Logbook)]" IconName="@BitIconName.Airplane" Url="@PageUrls.Logbook" />
-            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Flights)]" IconName="@BitIconName.BookAnswers" Url="@PageUrls.FlightLogs" />
-            <BitNavBarOption Text="@Localizer[nameof(AppStrings.FlightMap)]" IconName="@BitIconName.MapPin" Url="@PageUrls.FlightMap" />
-            <BitNavBarOption Text="@Localizer[nameof(AppStrings.FlightImport)]" IconName="@BitIconName.Upload" Url="@PageUrls.FlightImport" />
-            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Reports)]" IconName="@BitIconName.ReportDocument" Url="@PageUrls.FlightReports" />
-            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Summary)]" IconName="@BitIconName.BarChartVerticalFill" Url="@PageUrls.FlightSummary" />
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Logbook)]" IconName="@BitIconName.AirplaneSolid" Url="@PageUrls.Logbook" />
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.FlightLogs)]" IconName="@BitIconName.List" Url="@PageUrls.FlightLogs" />
         </AuthorizeView>
-        <AuthorizeView Policy="@AppFeatures.Logbook.ManageFleet">
-            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Aircrafts)]" IconName="@BitIconName.Airplane" Url="@PageUrls.AircraftList" />
-            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Airports)]" IconName="@BitIconName.Globe" Url="@PageUrls.Airports" />
+
+        <AuthorizeView Policy="@AppFeatures.BaseInfo.ManageAirports">
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Airports)]" IconName="@BitIconName.Globe" Url="@PageUrls.BaseInfoAirports" />
+        </AuthorizeView>
+        <AuthorizeView Policy="@AppFeatures.BaseInfo.ManageCountries">
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Countries)]" IconName="@BitIconName.MapLayers" Url="@PageUrls.BaseInfoCountries" />
+        </AuthorizeView>
+        <AuthorizeView Policy="@AppFeatures.BaseInfo.ManageTimeZones">
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.TimeZones)]" IconName="@BitIconName.WorldClock" Url="@PageUrls.BaseInfoTimeZones" />
+        </AuthorizeView>
+        <AuthorizeView Policy="@AppFeatures.BaseInfo.ManageCities">
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Cities)]" IconName="@BitIconName.CityNext" Url="@PageUrls.BaseInfoCities" />
+        </AuthorizeView>
+        <AuthorizeView Policy="@AppFeatures.BaseInfo.ManageAircraft">
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Aircrafts)]" IconName="@BitIconName.Airplane" Url="@PageUrls.BaseInfoAircraft" />
+        </AuthorizeView>
+        <AuthorizeView Policy="@AppFeatures.BaseInfo.ManageCrew">
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.CrewMembers)]" IconName="@BitIconName.People" Url="@PageUrls.BaseInfoCrew" />
         </AuthorizeView>
 
         <BitNavBarOption Text="@Localizer[nameof(AppStrings.Terms)]" IconName="@BitIconName.EntityExtraction" Url="@PageUrls.Terms" />

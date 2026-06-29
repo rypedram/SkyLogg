@@ -14,6 +14,18 @@ public static partial class PageUrls
 
     public const string Dashboard = "/dashboard";
 
+    public const string BaseInfoAirports = "/base-info/airports";
+
+    public const string BaseInfoAircraft = "/base-info/aircraft";
+
+    public const string BaseInfoCrew = "/base-info/crew";
+
+    public const string BaseInfoCities = "/base-info/cities";
+
+    public const string BaseInfoCountries = "/base-info/countries";
+
+    public const string BaseInfoTimeZones = "/base-info/timezones";
+
     public const string Logbook = "/logbook";
 
     public const string FlightLogs = "/logbook/flights";
@@ -29,12 +41,6 @@ public static partial class PageUrls
     public const string FlightMap = "/logbook/map";
 
     public const string FlightImport = "/logbook/import";
-
-    public const string CrewMembers = "/logbook/crew";
-
-    public const string AircraftList = "/logbook/aircraft";
-
-    public const string Airports = "/logbook/airports";
 
     public const string Roles = "/user-groups";
 

@@ -13,8 +13,8 @@ public partial class FlightMapService
         var query = dbContext.FlightLogs
             .AsNoTracking()
             .Include(f => f.Aircraft)
-            .Include(f => f.Sectors).ThenInclude(s => s.DepartureAirport)
-            .Include(f => f.Sectors).ThenInclude(s => s.ArrivalAirport)
+            .Include(f => f.Sectors).ThenInclude(s => s.DepartureAirport!).ThenInclude(a => a.CountryInfo)
+            .Include(f => f.Sectors).ThenInclude(s => s.ArrivalAirport!).ThenInclude(a => a.CountryInfo)
             .Where(f => f.UserId == userId && !f.Deleted);
 
         if (fromDate.HasValue)
@@ -26,10 +26,10 @@ public partial class FlightMapService
         if (aircraftId.HasValue)
             query = query.Where(f => f.AircraftId == aircraftId.Value);
 
-        if (year.HasValue)
+        if (year is >= 1900 and <= 2100)
             query = query.Where(f => f.FlightDate.Year == year.Value);
 
-        if (month.HasValue)
+        if (month is >= 1 and <= 12)
             query = query.Where(f => f.FlightDate.Month == month.Value);
 
         var flights = await query
@@ -62,7 +62,7 @@ public partial class FlightMapService
             .ToList();
 
         var countryStats = flights
-            .SelectMany(f => f.Sectors.SelectMany(s => new[] { s.DepartureAirport?.Country, s.ArrivalAirport?.Country }))
+            .SelectMany(f => f.Sectors.SelectMany(s => new[] { GetCountryName(s.DepartureAirport), GetCountryName(s.ArrivalAirport) }))
             .Where(country => string.IsNullOrWhiteSpace(country) is false)
             .GroupBy(country => country)
             .Select(g => new FlightMapCountryStatDto { Country = g.Key, VisitCount = g.Count() })
@@ -83,6 +83,9 @@ public partial class FlightMapService
     private static FlightMapRouteDto? CreateRoute(FlightLog flight, FlightSector sector)
     {
         if (sector.DepartureAirport is null || sector.ArrivalAirport is null)
+            return null;
+
+        if (HasMapCoordinates(sector.DepartureAirport) is false || HasMapCoordinates(sector.ArrivalAirport) is false)
             return null;
 
         return new FlightMapRouteDto
@@ -139,6 +142,12 @@ public partial class FlightMapService
     private static double ToRadians(double degrees) => degrees * Math.PI / 180;
 
     private static double ToDegrees(double radians) => radians * 180 / Math.PI;
+
+    private static bool HasMapCoordinates(Airport airport) =>
+        Math.Abs(airport.Latitude) > 0.0001 || Math.Abs(airport.Longitude) > 0.0001;
+
+    private static string? GetCountryName(Airport? airport) =>
+        airport?.CountryInfo?.Name ?? airport?.Country;
 
     private sealed record AirportPinSeed(string? Code, double Latitude, double Longitude);
 }
