@@ -58,7 +58,7 @@ public partial class LogbookAnalyticsService
             .ToListAsync(cancellationToken);
 
         var aircraftUsage = logs
-            .GroupBy(l => new { l.AircraftId, l.Aircraft!.Registration })
+            .GroupBy(l => new { l.AircraftId, Registration = l.Aircraft?.Registration ?? "—" })
             .Select(g => new AircraftUsageStatDto
             {
                 AircraftId = g.Key.AircraftId,

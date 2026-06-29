@@ -21,7 +21,19 @@
     {
         <BitRippleLoading />
     }
-    else if (summary is not null)
+    else if (string.IsNullOrWhiteSpace(loadError) is false)
+    {
+        <BitMessage Color="BitColor.Error">@loadError</BitMessage>
+    }
+    else if (summary is null)
+    {
+        <BitMessage Color="BitColor.Error">@Localizer[nameof(AppStrings.FlightSummaryLoadFailed)]</BitMessage>
+    }
+    else if (summary.FlightCount == 0)
+    {
+        <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoFlightsInRange)]</BitMessage>
+    }
+    else
     {
         <div class="logbook-stats">
             <div class="logbook-stat"><BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.TotalBlockHours)]</BitText><FlightTimeDisplay Minutes="summary.TotalBlockMinutes" /></div>

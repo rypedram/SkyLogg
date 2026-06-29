@@ -43,6 +43,7 @@ public partial class FlightMapService
             .ToList();
 
         var airportPins = routes
+            .Where(r => r.HasCoordinates)
             .SelectMany(r => new[]
             {
                 new AirportPinSeed(r.DepartureAirport, r.DepartureLatitude, r.DepartureLongitude),
@@ -85,8 +86,7 @@ public partial class FlightMapService
         if (sector.DepartureAirport is null || sector.ArrivalAirport is null)
             return null;
 
-        if (HasMapCoordinates(sector.DepartureAirport) is false || HasMapCoordinates(sector.ArrivalAirport) is false)
-            return null;
+        var hasCoordinates = HasMapCoordinates(sector.DepartureAirport) && HasMapCoordinates(sector.ArrivalAirport);
 
         return new FlightMapRouteDto
         {
@@ -100,11 +100,14 @@ public partial class FlightMapService
             ArrivalLatitude = sector.ArrivalAirport.Latitude,
             ArrivalLongitude = sector.ArrivalAirport.Longitude,
             FlightTimeMinutes = sector.FlightTimeMinutes,
-            GreatCirclePoints = CalculateGreatCircle(
-                sector.DepartureAirport.Latitude,
-                sector.DepartureAirport.Longitude,
-                sector.ArrivalAirport.Latitude,
-                sector.ArrivalAirport.Longitude),
+            HasCoordinates = hasCoordinates,
+            GreatCirclePoints = hasCoordinates
+                ? CalculateGreatCircle(
+                    sector.DepartureAirport.Latitude,
+                    sector.DepartureAirport.Longitude,
+                    sector.ArrivalAirport.Latitude,
+                    sector.ArrivalAirport.Longitude)
+                : [],
         };
     }
 

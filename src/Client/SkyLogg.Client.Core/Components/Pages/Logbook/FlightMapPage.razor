@@ -1,151 +1,151 @@
-@attribute [Route(PageUrls.FlightMap)]
-@attribute [Route("{culture?}" + PageUrls.FlightMap)]
-@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
-@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFlightLogs)]
-@inherits AppPageBase
-
-<AppPageData Title="@Localizer[nameof(AppStrings.FlightMap)]"
-             PageTitle="@Localizer[nameof(AppStrings.FlightMapPageTitle)]" />
-
-<LogbookWorkspace>
-    <div class="logbook-toolbar">
-        <BitNumberField @bind-Value="yearFilter"
-                        Label="@Localizer[nameof(AppStrings.Year)]"
-                        Placeholder="yyyy"
-                        Min="1900"
-                        Max="2100" />
-        <BitNumberField @bind-Value="monthFilter"
-                        Label="@Localizer[nameof(AppStrings.Month)]"
-                        Placeholder="1-12"
-                        Min="1"
-                        Max="12" />
-        <BitDropdown Items="aircraftItems"
-                     NoValidate
-                     Label="@Localizer[nameof(AppStrings.Aircraft)]"
-                     Value="@aircraftFilterValue"
-                     OnChange="WrapHandled((string? v) => OnAircraftFilterChanged(v))" />
-        <BitButton IconName="@BitIconName.Refresh" OnClick="WrapHandled(LoadMap)">
-            @Localizer[nameof(AppStrings.Apply)]
-        </BitButton>
-    </div>
-
-    @if (isLoading)
-    {
-        <BitRippleLoading />
-    }
-    else if (string.IsNullOrWhiteSpace(loadError) is false)
-    {
-        <BitMessage Color="BitColor.Error">@loadError</BitMessage>
-    }
-    else if (mapData is null)
-    {
-        <BitMessage Color="BitColor.Error">@Localizer[nameof(AppStrings.FlightMapLoadFailed)]</BitMessage>
-    }
-    else if (mapData.FlightCount == 0)
-    {
-        <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoFlights)]</BitMessage>
-    }
-    else
-    {
-        <LogbookSection Title="@Localizer[nameof(AppStrings.FlightMap)]">
-            <BitStack Horizontal Wrap Gap="1rem">
-                <BitText>@Localizer[nameof(AppStrings.MapProvider)]: @mapData.ProviderKey</BitText>
-                <BitText>@Localizer[nameof(AppStrings.TotalFlights)]: @mapData.FlightCount</BitText>
-                <BitText>@Localizer[nameof(AppStrings.TotalFlightHours)]: <FlightTimeDisplay Minutes="mapData.TotalFlightMinutes" /></BitText>
-            </BitStack>
-
-            @if (mapData.Routes.Count == 0)
-            {
-                <BitMessage Color="BitColor.Warning">@Localizer[nameof(AppStrings.FlightMapNoRoutes)]</BitMessage>
-            }
-            else
-            {
-                <svg viewBox="0 0 360 180" class="flight-map-svg">
-                    @foreach (var route in mapData.Routes)
-                    {
-                        foreach (var segment in GetPolylineSegments(route))
-                        {
-                            <polyline points="@segment"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      stroke-width="1.2"
-                                      opacity="0.75" />
-                        }
-                    }
-                    @foreach (var airport in mapData.Airports)
-                    {
-                        <circle cx="@ProjectX(airport.Longitude)"
-                                cy="@ProjectY(airport.Latitude)"
-                                r="@AirportRadius(airport.VisitCount)"
-                                fill="currentColor"
-                                opacity="0.9">
-                            <title>@airport.ICAO — @airport.VisitCount</title>
-                        </circle>
-                    }
-                </svg>
-            }
-        </LogbookSection>
-
-        <div class="logbook-split">
-            <LogbookSection Title="@Localizer[nameof(AppStrings.Routes)]">
-                @if (mapData.Routes.Count == 0)
-                {
-                    <BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.FlightMapNoRoutes)]</BitText>
-                }
-                else
-                {
-                    <div class="data-table-wrap">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>@Localizer[nameof(AppStrings.FlightDate)]</th>
-                                    <th>@Localizer[nameof(AppStrings.Aircraft)]</th>
-                                    <th>@Localizer[nameof(AppStrings.Route)]</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var route in mapData.Routes.Take(20))
-                                {
-                                    <tr>
-                                        <td>@route.FlightDate.ToString("d")</td>
-                                        <td class="primary-cell">@route.AircraftRegistration</td>
-                                        <td class="secondary-cell">@route.DepartureAirport → @route.ArrivalAirport</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </LogbookSection>
-
-            <LogbookSection Title="@Localizer[nameof(AppStrings.VisitedCountries)]">
-                @if (mapData.CountryStats.Count == 0)
-                {
-                    <BitText Typography="BitTypography.Body2">—</BitText>
-                }
-                else
-                {
-                    <div class="data-table-wrap">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>@Localizer[nameof(AppStrings.Country)]</th>
-                                    <th>@Localizer[nameof(AppStrings.FlightCount)]</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var country in mapData.CountryStats.Take(10))
-                                {
-                                    <tr>
-                                        <td class="primary-cell">@country.Country</td>
-                                        <td>@country.VisitCount</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </LogbookSection>
-        </div>
-    }
-</LogbookWorkspace>
+@attribute [Route(PageUrls.FlightMap)]
+@attribute [Route("{culture?}" + PageUrls.FlightMap)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFlightLogs)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.FlightMap)]"
+             PageTitle="@Localizer[nameof(AppStrings.FlightMapPageTitle)]" />
+
+<LogbookWorkspace>
+    <div class="logbook-toolbar">
+        <BitNumberField @bind-Value="yearFilter"
+                        Label="@Localizer[nameof(AppStrings.Year)]"
+                        Placeholder="yyyy"
+                        Min="1900"
+                        Max="2100" />
+        <BitNumberField @bind-Value="monthFilter"
+                        Label="@Localizer[nameof(AppStrings.Month)]"
+                        Placeholder="1-12"
+                        Min="1"
+                        Max="12" />
+        <BitDropdown Items="aircraftItems"
+                     NoValidate
+                     Label="@Localizer[nameof(AppStrings.Aircraft)]"
+                     Value="@aircraftFilterValue"
+                     OnChange="WrapHandled((string? v) => OnAircraftFilterChanged(v))" />
+        <BitButton IconName="@BitIconName.Refresh" OnClick="WrapHandled(LoadMap)">
+            @Localizer[nameof(AppStrings.Apply)]
+        </BitButton>
+    </div>
+
+    @if (isLoading)
+    {
+        <BitRippleLoading />
+    }
+    else if (string.IsNullOrWhiteSpace(loadError) is false)
+    {
+        <BitMessage Color="BitColor.Error">@loadError</BitMessage>
+    }
+    else if (mapData is null)
+    {
+        <BitMessage Color="BitColor.Error">@Localizer[nameof(AppStrings.FlightMapLoadFailed)]</BitMessage>
+    }
+    else if (mapData.FlightCount == 0)
+    {
+        <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoFlights)]</BitMessage>
+    }
+    else
+    {
+        <LogbookSection Title="@Localizer[nameof(AppStrings.FlightMap)]">
+            <BitStack Horizontal Wrap Gap="1rem">
+                <BitText>@Localizer[nameof(AppStrings.MapProvider)]: @mapData.ProviderKey</BitText>
+                <BitText>@Localizer[nameof(AppStrings.TotalFlights)]: @mapData.FlightCount</BitText>
+                <BitText>@Localizer[nameof(AppStrings.TotalFlightHours)]: <FlightTimeDisplay Minutes="mapData.TotalFlightMinutes" /></BitText>
+            </BitStack>
+
+            @if (MappableRoutes.Any() is false)
+            {
+                <BitMessage Color="BitColor.Warning">@Localizer[nameof(AppStrings.FlightMapNoRoutes)]</BitMessage>
+            }
+            else
+            {
+                <svg viewBox="0 0 360 180" class="flight-map-svg">
+                    @foreach (var route in MappableRoutes)
+                    {
+                        foreach (var segment in GetPolylineSegments(route))
+                        {
+                            <polyline points="@segment"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      stroke-width="1.2"
+                                      opacity="0.75" />
+                        }
+                    }
+                    @foreach (var airport in mapData.Airports)
+                    {
+                        <circle cx="@ProjectX(airport.Longitude)"
+                                cy="@ProjectY(airport.Latitude)"
+                                r="@AirportRadius(airport.VisitCount)"
+                                fill="currentColor"
+                                opacity="0.9">
+                            <title>@airport.ICAO — @airport.VisitCount</title>
+                        </circle>
+                    }
+                </svg>
+            }
+        </LogbookSection>
+
+        <div class="logbook-split">
+            <LogbookSection Title="@Localizer[nameof(AppStrings.Routes)]">
+                @if (mapData.Routes.Count == 0)
+                {
+                    <BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.FlightMapNoRoutes)]</BitText>
+                }
+                else
+                {
+                    <div class="data-table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>@Localizer[nameof(AppStrings.FlightDate)]</th>
+                                    <th>@Localizer[nameof(AppStrings.Aircraft)]</th>
+                                    <th>@Localizer[nameof(AppStrings.Route)]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var route in mapData.Routes.Take(20))
+                                {
+                                    <tr>
+                                        <td>@route.FlightDate.ToString("d")</td>
+                                        <td class="primary-cell">@route.AircraftRegistration</td>
+                                        <td class="secondary-cell">@route.DepartureAirport → @route.ArrivalAirport</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </LogbookSection>
+
+            <LogbookSection Title="@Localizer[nameof(AppStrings.VisitedCountries)]">
+                @if (mapData.CountryStats.Count == 0)
+                {
+                    <BitText Typography="BitTypography.Body2">—</BitText>
+                }
+                else
+                {
+                    <div class="data-table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>@Localizer[nameof(AppStrings.Country)]</th>
+                                    <th>@Localizer[nameof(AppStrings.FlightCount)]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var country in mapData.CountryStats.Take(10))
+                                {
+                                    <tr>
+                                        <td class="primary-cell">@country.Country</td>
+                                        <td>@country.VisitCount</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </LogbookSection>
+        </div>
+    }
+</LogbookWorkspace>

@@ -37,6 +37,8 @@ public partial class FlightMapRouteDto
 
     public int FlightTimeMinutes { get; set; }
 
+    public bool HasCoordinates { get; set; }
+
     public List<FlightMapPointDto> GreatCirclePoints { get; set; } = [];
 }
 

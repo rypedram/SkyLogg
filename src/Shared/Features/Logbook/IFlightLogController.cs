@@ -13,13 +13,13 @@ public interface IFlightLogController : IAppController
     [HttpGet]
     Task<CurrencyStatusDto> GetCurrencyStatus(CancellationToken cancellationToken);
 
-    [HttpGet]
+    [HttpGet("{?fromDate,toDate}")]
     Task<FlightSummaryDto> GetSummary(DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken);
 
-    [HttpGet]
+    [HttpGet("{?fromDate,toDate}")]
     Task<byte[]> ExportCsv(DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken);
 
-    [HttpGet]
+    [HttpGet("{?fromDate,toDate}")]
     Task<byte[]> ExportPdf(DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken);
 
     [HttpPost]

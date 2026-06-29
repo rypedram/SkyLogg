@@ -1298,6 +1298,8 @@ After reaching {0}, extra sign-ins will have reduced functions.</value>
     <data name="VisitedCountries" xml:space="preserve"><value>Visited Countries</value></data>
     <data name="AirportPins" xml:space="preserve"><value>Airport Pins</value></data>
     <data name="MapProvider" xml:space="preserve"><value>Map Provider</value></data>
+    <data name="FlightSummaryLoadFailed" xml:space="preserve"><value>Could not load flight summary.</value></data>
+    <data name="NoFlightsInRange" xml:space="preserve"><value>No flights found for the selected date range.</value></data>
     <data name="FlightMapNoRoutes" xml:space="preserve"><value>No routes to display. Set latitude and longitude on airports in Base Info.</value></data>
     <data name="FlightMapLoadFailed" xml:space="preserve"><value>Could not load flight map data.</value></data>
     <data name="Year" xml:space="preserve"><value>Year</value></data>

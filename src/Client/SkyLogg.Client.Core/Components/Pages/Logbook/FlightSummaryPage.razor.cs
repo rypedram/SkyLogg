@@ -7,7 +7,8 @@ public partial class FlightSummaryPage
     [AutoInject] private IFlightLogController flightLogController = default!;
 
     private bool isLoading;
-    private DateTimeOffset? fromDate = DateTimeOffset.UtcNow.AddMonths(-1);
+    private string? loadError;
+    private DateTimeOffset? fromDate = DateTimeOffset.UtcNow.AddYears(-10);
     private DateTimeOffset? toDate = DateTimeOffset.UtcNow;
     private FlightSummaryDto? summary;
 
@@ -20,11 +21,24 @@ public partial class FlightSummaryPage
     private async Task LoadSummary()
     {
         isLoading = true;
+        loadError = null;
+
         try
         {
-            var from = DateOnly.FromDateTime((fromDate ?? DateTimeOffset.UtcNow).Date);
-            var to = DateOnly.FromDateTime((toDate ?? DateTimeOffset.UtcNow).Date);
+            var (from, to) = GetDateRange();
             summary = await flightLogController.GetSummary(from, to, CurrentCancellationToken);
+        }
+        catch (KnownException e)
+        {
+            summary = null;
+            loadError = e.Message;
+            SnackBarService.Error(e.Message);
+        }
+        catch (Exception e)
+        {
+            summary = null;
+            loadError = e.Message;
+            SnackBarService.Error(Localizer[nameof(AppStrings.FlightSummaryLoadFailed)]);
         }
         finally
         {
@@ -32,18 +46,27 @@ public partial class FlightSummaryPage
         }
     }
 
+    private (DateOnly From, DateOnly To) GetDateRange()
+    {
+        var from = DateOnly.FromDateTime((fromDate ?? DateTimeOffset.UtcNow.AddYears(-10)).Date);
+        var to = DateOnly.FromDateTime((toDate ?? DateTimeOffset.UtcNow).Date);
+
+        if (from > to)
+            (from, to) = (to, from);
+
+        return (from, to);
+    }
+
     private async Task ExportCsv()
     {
-        var from = DateOnly.FromDateTime((fromDate ?? DateTimeOffset.UtcNow).Date);
-        var to = DateOnly.FromDateTime((toDate ?? DateTimeOffset.UtcNow).Date);
+        var (from, to) = GetDateRange();
         var bytes = await flightLogController.ExportCsv(from, to, CurrentCancellationToken);
         await DownloadFile(bytes, $"flight-log-{from:yyyyMMdd}-{to:yyyyMMdd}.csv", "text/csv");
     }
 
     private async Task ExportPdf()
     {
-        var from = DateOnly.FromDateTime((fromDate ?? DateTimeOffset.UtcNow).Date);
-        var to = DateOnly.FromDateTime((toDate ?? DateTimeOffset.UtcNow).Date);
+        var (from, to) = GetDateRange();
         var bytes = await flightLogController.ExportPdf(from, to, CurrentCancellationToken);
         await DownloadFile(bytes, $"flight-log-{from:yyyyMMdd}-{to:yyyyMMdd}.pdf", "application/pdf");
     }

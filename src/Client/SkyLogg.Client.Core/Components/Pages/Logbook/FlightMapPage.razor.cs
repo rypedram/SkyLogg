@@ -16,6 +16,9 @@ public partial class FlightMapPage
     private FlightMapDto? mapData;
     private List<BitDropdownItem<string>> aircraftItems = [];
 
+    private IEnumerable<FlightMapRouteDto> MappableRoutes =>
+        mapData?.Routes.Where(r => r.HasCoordinates) ?? [];
+
     protected override async Task OnInitAsync()
     {
         await base.OnInitAsync();
@@ -65,6 +68,12 @@ public partial class FlightMapPage
             mapData = null;
             SnackBarService.Error(e.Message);
         }
+        catch (Exception)
+        {
+            loadError = Localizer[nameof(AppStrings.FlightMapLoadFailed)];
+            mapData = null;
+            SnackBarService.Error(loadError);
+        }
         finally
         {
             isLoading = false;
@@ -77,6 +86,9 @@ public partial class FlightMapPage
 
     private static IEnumerable<string> GetPolylineSegments(FlightMapRouteDto route)
     {
+        if (route.HasCoordinates is false)
+            yield break;
+
         var points = route.GreatCirclePoints.Count > 0
             ? route.GreatCirclePoints
             : [new FlightMapPointDto { Latitude = route.DepartureLatitude, Longitude = route.DepartureLongitude },

@@ -4,6 +4,6 @@ namespace SkyLogg.Shared.Features.Logbook;
 [AuthorizedApi]
 public interface IFlightMapController : IAppController
 {
-    [HttpGet]
+    [HttpGet("{?fromDate,toDate,aircraftId,year,month}")]
     Task<FlightMapDto> GetMapData(DateOnly? fromDate, DateOnly? toDate, Guid? aircraftId, int? year, int? month, CancellationToken cancellationToken);
 }
