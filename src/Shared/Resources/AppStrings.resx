@@ -1309,6 +1309,9 @@ After reaching {0}, extra sign-ins will have reduced functions.</value>
     <data name="FlightDetail" xml:space="preserve"><value>Flight Detail</value></data>
     <data name="FlightDetailPageTitle" xml:space="preserve"><value>Flight Detail</value></data>
     <data name="FlightDate" xml:space="preserve"><value>Flight Date</value></data>
+    <data name="Route" xml:space="preserve"><value>Route</value></data>
+    <data name="Actions" xml:space="preserve"><value>Actions</value></data>
+    <data name="Status" xml:space="preserve"><value>Status</value></data>
     <data name="Aircraft" xml:space="preserve"><value>Aircraft</value></data>
     <data name="Aircrafts" xml:space="preserve"><value>Aircraft</value></data>
     <data name="AircraftsPageTitle" xml:space="preserve"><value>Aircraft Management</value></data>

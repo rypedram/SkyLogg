@@ -38,7 +38,7 @@ public partial class TimeZonesPage : BaseInfoPageBase
         }
     }
 
-    private void EditTimeZone(GeoTimeZoneDto timeZone)
+    private void LoadTimeZone(GeoTimeZoneDto timeZone)
     {
         editingTimeZone = new GeoTimeZoneDto
         {
@@ -49,6 +49,8 @@ public partial class TimeZonesPage : BaseInfoPageBase
         };
         CaptureFormSnapshot();
     }
+
+    private void EditTimeZone(GeoTimeZoneDto timeZone) => OpenEditForm(() => LoadTimeZone(timeZone));
 
     private async Task SaveTimeZone()
     {
@@ -61,6 +63,7 @@ public partial class TimeZonesPage : BaseInfoPageBase
                 await geoTimeZoneController.Update(editingTimeZone, CurrentCancellationToken);
 
             ResetFormInternal();
+            CloseForm();
             await SearchTimeZones();
         }
         finally

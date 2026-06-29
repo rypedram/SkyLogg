@@ -1,0 +1,40 @@
+@inherits AppComponentBase
+
+<div class="base-info-toolbar">
+    @if (ShowSearch)
+    {
+        <BitSearchBox @bind-Value="SearchText"
+                      Class="search"
+                      Placeholder="@SearchPlaceholder"
+                      OnChange="WrapHandled(OnSearch.InvokeAsync)"
+                      Immediate
+                      DebounceTime="300" />
+    }
+    <BitSpacer />
+    @if (ChildContent is not null)
+    {
+        @ChildContent
+    }
+    @if (ShowAddButton)
+    {
+        <BitButton IconName="@BitIconName.Add"
+                   Color="BitColor.Primary"
+                   OnClick="WrapHandled(OnAdd.InvokeAsync)">
+            @AddButtonText
+        </BitButton>
+    }
+</div>
+
+@code {
+    [Parameter] public bool ShowSearch { get; set; } = true;
+    [Parameter] public string? SearchText { get; set; }
+    [Parameter] public EventCallback<string?> SearchTextChanged { get; set; }
+    [Parameter] public string? SearchPlaceholder { get; set; }
+    [Parameter] public EventCallback OnSearch { get; set; }
+
+    [Parameter] public bool ShowAddButton { get; set; } = true;
+    [Parameter] public string? AddButtonText { get; set; }
+    [Parameter] public EventCallback OnAdd { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

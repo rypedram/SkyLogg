@@ -1,5 +1,6 @@
 @import '../Styles/abstracts/_media-queries.scss';
 @import '../Styles/abstracts/_bit-css-variables.scss';
+@import 'components/_data-workspace.scss';
 
 :root[bit-theme="dark"] {
     //--bit-clr-bg-pri: #010409;

@@ -7,161 +7,123 @@
 <AppPageData Title="@(Id == null ? Localizer[nameof(AppStrings.AddFlight)] : Localizer[nameof(AppStrings.EditFlight)])"
              PageTitle="@Localizer[nameof(AppStrings.FlightLogFormPageTitle)]" />
 
-<section>
+<LogbookWorkspace>
     <EditForm Model="flightLog" FormName="LogbookFlightLogForm" novalidate>
         <AppDataAnnotationsValidator @ref="formValidator" />
         <ValidationSummary />
-        <BitStack Gap="1.5rem">
-            <BitAccordion Title="@Localizer[nameof(AppStrings.FlightInfo)]">
-                <BitCard Style="padding:1rem" FullWidth>
-                    <BitStack Gap="1rem">
-                        <BitDatePicker @bind-Value="flightDate" Label="@Localizer[nameof(AppStrings.FlightDate)]" />
-                        <BitTextField @bind-Value="flightLog.Remarks" Multiline Rows="3" Label="@Localizer[nameof(AppStrings.Remarks)]" />
-                    </BitStack>
-                </BitCard>
-            </BitAccordion>
 
-            <BitAccordion Title="@Localizer[nameof(AppStrings.Aircraft)]">
-                <BitCard Style="padding:1rem" FullWidth>
-                    <BitDropdown Items="aircraftItems"
-                                 NoValidate
-                                 Label="@Localizer[nameof(AppStrings.Aircraft)]"
-                                 Value="@aircraftValue"
-                                 OnChange="WrapHandled((string? v) => OnAircraftChanged(v))" />
-                </BitCard>
-            </BitAccordion>
+        <LogbookSection Title="@Localizer[nameof(AppStrings.FlightInfo)]">
+            <div class="logbook-form-grid">
+                <BitDatePicker @bind-Value="flightDate" Label="@Localizer[nameof(AppStrings.FlightDate)]" />
+                <BitDropdown Items="aircraftItems"
+                             NoValidate
+                             Label="@Localizer[nameof(AppStrings.Aircraft)]"
+                             Value="@aircraftValue"
+                             OnChange="WrapHandled((string? v) => OnAircraftChanged(v))" />
+            </div>
+            <BitTextField @bind-Value="flightLog.Remarks" Multiline Rows="2" Label="@Localizer[nameof(AppStrings.Remarks)]" />
+        </LogbookSection>
 
-            <BitAccordion Title="@Localizer[nameof(AppStrings.Airports)]">
-                <BitStack Gap="1rem">
-                    @for (var i = 0; i < flightLog.Sectors.Count; i++)
-                    {
-                        var index = i;
-                        var sector = flightLog.Sectors[index];
-                        <BitCard Style="padding:1rem" FullWidth>
-                            <BitStack Gap="1rem">
-                                <BitText Typography="BitTypography.Subtitle1">@Localizer[nameof(AppStrings.Sector)] @(index + 1)</BitText>
-                                <AirportPicker Label="@Localizer[nameof(AppStrings.DepartureAirport)]"
-                                               SelectedAirportId="flightLog.Sectors[index].DepartureAirportId"
-                                               SelectedAirportIdChanged="(id) => SetSectorDepartureAirport(index, id)" />
-                                <AirportPicker Label="@Localizer[nameof(AppStrings.ArrivalAirport)]"
-                                               SelectedAirportId="flightLog.Sectors[index].ArrivalAirportId"
-                                               SelectedAirportIdChanged="(id) => SetSectorArrivalAirport(index, id)" />
-                                @if (flightLog.Sectors.Count > 1)
-                                {
-                                    <BitButton ButtonType="BitButtonType.Button" Color="BitColor.Error" Variant="BitVariant.Outline" OnClick="WrapHandled(() => RemoveSector(index))">
-                                        @Localizer[nameof(AppStrings.RemoveSector)]
-                                    </BitButton>
-                                }
-                            </BitStack>
-                        </BitCard>
-                    }
-                    <BitButton ButtonType="BitButtonType.Button" Variant="BitVariant.Outline" IconName="@BitIconName.Add" OnClick="WrapHandled(AddSector)">
-                        @Localizer[nameof(AppStrings.AddSector)]
-                    </BitButton>
-                </BitStack>
-            </BitAccordion>
-
-            <BitAccordion Title="@Localizer[nameof(AppStrings.Timing)]">
-                <BitStack Gap="1rem">
-                    @for (var i = 0; i < flightLog.Sectors.Count; i++)
-                    {
-                        var index = i;
-                        var sector = flightLog.Sectors[index];
-                        <BitCard Style="padding:1rem" FullWidth>
-                            <BitStack Gap="1rem">
-                                <BitText Typography="BitTypography.Subtitle1">@Localizer[nameof(AppStrings.Sector)] @(index + 1)</BitText>
-                                <BitStack Horizontal Wrap Gap="1rem">
-                                    <BitDatePicker @bind-Value="sectorBlockOffDates[index]" Label="@Localizer[nameof(AppStrings.BlockOff)]" />
-                                    <BitTextField @bind-Value="sectorBlockOffTimes[index]" Label="@Localizer[nameof(AppStrings.Time)]" Placeholder="HH:mm" />
-                                    <BitDatePicker @bind-Value="sectorBlockOnDates[index]" Label="@Localizer[nameof(AppStrings.BlockOn)]" />
-                                    <BitTextField @bind-Value="sectorBlockOnTimes[index]" Label="@Localizer[nameof(AppStrings.Time)]" Placeholder="HH:mm" />
-                                </BitStack>
-                                <BitStack Horizontal Wrap Gap="1rem">
-                                    <BitTextField @bind-Value="sectorTakeoffTimes[index]" Label="@Localizer[nameof(AppStrings.Takeoff)]" Placeholder="HH:mm (optional)" />
-                                    <BitTextField @bind-Value="sectorLandingTimes[index]" Label="@Localizer[nameof(AppStrings.Landing)]" Placeholder="HH:mm (optional)" />
-                                </BitStack>
-                                <BitStack Horizontal Wrap Gap="1rem">
-                                    <BitNumberField @bind-Value="sector.PicTimeMinutes" Label="@Localizer[nameof(AppStrings.PicTimeMinutes)]" />
-                                    <BitNumberField @bind-Value="sector.SicTimeMinutes" Label="@Localizer[nameof(AppStrings.SicTimeMinutes)]" />
-                                    <BitNumberField @bind-Value="sector.DualTimeMinutes" Label="@Localizer[nameof(AppStrings.DualTimeMinutes)]" />
-                                </BitStack>
-                                <BitStack Horizontal Wrap Gap="1rem">
-                                    <BitCheckbox @bind-Value="sector.IsIfr" Label="@Localizer[nameof(AppStrings.Ifr)]" />
-                                    <BitNumberField @bind-Value="sector.IfrTimeMinutes" Label="@Localizer[nameof(AppStrings.IfrTimeMinutes)]" />
-                                    <BitCheckbox @bind-Value="sector.IsNight" Label="@Localizer[nameof(AppStrings.Night)]" />
-                                    <BitNumberField @bind-Value="sector.NightTimeMinutes" Label="@Localizer[nameof(AppStrings.NightTimeMinutes)]" />
-                                </BitStack>
-                                <BitStack Horizontal Wrap Gap="1rem">
-                                    <BitNumberField @bind-Value="sector.DayTakeoffs" Label="@Localizer[nameof(AppStrings.DayTakeoffs)]" />
-                                    <BitNumberField @bind-Value="sector.NightTakeoffs" Label="@Localizer[nameof(AppStrings.NightTakeoffs)]" />
-                                    <BitNumberField @bind-Value="sector.DayLandings" Label="@Localizer[nameof(AppStrings.DayLandings)]" />
-                                    <BitNumberField @bind-Value="sector.NightLandings" Label="@Localizer[nameof(AppStrings.NightLandings)]" />
-                                </BitStack>
-                                <BitButton ButtonType="BitButtonType.Button" Variant="BitVariant.Outline" Size="BitSize.Small" OnClick="WrapHandled(RecalculateTimes)">
-                                    @Localizer[nameof(AppStrings.Refresh)]
-                                </BitButton>
-                                <BitText Typography="BitTypography.Body2">
-                                    @Localizer[nameof(AppStrings.BlockTime)]: @sector.BlockTimeDisplay |
-                                    @Localizer[nameof(AppStrings.FlightTime)]: @sector.FlightTimeDisplay
-                                </BitText>
-                            </BitStack>
-                        </BitCard>
-                    }
-                </BitStack>
-            </BitAccordion>
-
-            <BitAccordion Title="@Localizer[nameof(AppStrings.Crew)]">
-                <BitCard Style="padding:1rem" FullWidth>
-                    <BitStack Gap="1rem">
-                        @for (var i = 0; i < flightLog.Crew.Count; i++)
+        <LogbookSection Title="@Localizer[nameof(AppStrings.Sectors)]"
+                        HeaderActions="@sectorHeader">
+            @for (var i = 0; i < flightLog.Sectors.Count; i++)
+            {
+                var index = i;
+                var sector = flightLog.Sectors[index];
+                <div class="logbook-sector-card">
+                    <BitStack Horizontal HorizontalAlign="BitAlignment.SpaceBetween" VerticalAlign="BitAlignment.Center">
+                        <BitText Typography="BitTypography.Subtitle2">@Localizer[nameof(AppStrings.Sector)] @(index + 1)</BitText>
+                        @if (flightLog.Sectors.Count > 1)
                         {
-                            var index = i;
-                            <BitStack Horizontal Wrap Gap="1rem">
-                                <BitDropdown Items="crewItems"
-                                             NoValidate
-                                             Label="@Localizer[nameof(AppStrings.Crew)]"
-                                             Value="@(flightLog.Crew[index].CrewMemberId == Guid.Empty ? null : flightLog.Crew[index].CrewMemberId.ToString())"
-                                             OnChange="WrapHandled((string? v) => OnCrewChanged(index, v))" />
-                                <BitDropdown Items="roleItems"
-                                             NoValidate
-                                             Label="@Localizer[nameof(AppStrings.CrewRole)]"
-                                             Value="@flightLog.Crew[index].RoleType.ToString()"
-                                             OnChange="WrapHandled((string? v) => OnRoleChanged(index, v))" />
-                                @if (flightLog.Crew.Count > 1)
-                                {
-                                    <BitButton ButtonType="BitButtonType.Button" IconOnly IconName="@BitIconName.Delete" OnClick="WrapHandled(() => RemoveCrew(index))" />
-                                }
-                            </BitStack>
+                            <BitButton ButtonType="BitButtonType.Button"
+                                       Size="BitSize.Small"
+                                       Color="BitColor.Error"
+                                       Variant="BitVariant.Outline"
+                                       IconName="@BitIconName.Delete"
+                                       OnClick="WrapHandled(() => RemoveSector(index))">
+                                @Localizer[nameof(AppStrings.RemoveSector)]
+                            </BitButton>
                         }
-                        <BitButton ButtonType="BitButtonType.Button" Variant="BitVariant.Outline" OnClick="WrapHandled(AddCrew)">@Localizer[nameof(AppStrings.AddCrew)]</BitButton>
                     </BitStack>
-                </BitCard>
-            </BitAccordion>
 
-            <BitAccordion Title="@Localizer[nameof(AppStrings.Review)]">
-                <BitCard Style="padding:1rem" FullWidth>
-                    <BitStack Gap="1rem">
-                        <BitButton ButtonType="BitButtonType.Button" Variant="BitVariant.Outline" Size="BitSize.Small" OnClick="WrapHandled(RecalculateTimes)">
-                            @Localizer[nameof(AppStrings.Refresh)]
-                        </BitButton>
-                        <BitText>@Localizer[nameof(AppStrings.FlightDate)]: @flightLog.FlightDate.ToString("d")</BitText>
-                        <BitText>@Localizer[nameof(AppStrings.Aircraft)]: @SelectedAircraftText</BitText>
-                        <BitText>@Localizer[nameof(AppStrings.Sectors)]: @flightLog.RouteSummary</BitText>
-                        <BitStack Horizontal Wrap Gap="1rem">
-                            <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.BlockTime)]</BitText><FlightTimeDisplay Minutes="totalBlockMinutes" /></BitCard>
-                            <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.FlightTime)]</BitText><FlightTimeDisplay Minutes="totalFlightMinutes" /></BitCard>
-                            <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Pic)]</BitText><FlightTimeDisplay Minutes="totalPicMinutes" /></BitCard>
-                            <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Sic)]</BitText><FlightTimeDisplay Minutes="totalSicMinutes" /></BitCard>
-                            <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Dual)]</BitText><FlightTimeDisplay Minutes="totalDualMinutes" /></BitCard>
-                            <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Night)]</BitText><FlightTimeDisplay Minutes="totalNightMinutes" /></BitCard>
-                            <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Ifr)]</BitText><FlightTimeDisplay Minutes="totalIfrMinutes" /></BitCard>
-                            <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Landings)]</BitText><BitText>@totalLandings</BitText></BitCard>
-                        </BitStack>
-                    </BitStack>
-                </BitCard>
-            </BitAccordion>
+                    <div class="logbook-form-grid">
+                        <AirportPicker Label="@Localizer[nameof(AppStrings.DepartureAirport)]"
+                                       SelectedAirportId="flightLog.Sectors[index].DepartureAirportId"
+                                       SelectedAirportIdChanged="(id) => SetSectorDepartureAirport(index, id)" />
+                        <AirportPicker Label="@Localizer[nameof(AppStrings.ArrivalAirport)]"
+                                       SelectedAirportId="flightLog.Sectors[index].ArrivalAirportId"
+                                       SelectedAirportIdChanged="(id) => SetSectorArrivalAirport(index, id)" />
+                    </div>
 
-            <BitStack Horizontal HorizontalAlign="BitAlignment.SpaceBetween" Gap="1rem">
+                    <div class="logbook-form-grid">
+                        <BitDatePicker @bind-Value="sectorBlockOffDates[index]" Label="@Localizer[nameof(AppStrings.BlockOff)]" />
+                        <BitTextField @bind-Value="sectorBlockOffTimes[index]" Label="@Localizer[nameof(AppStrings.Time)]" Placeholder="HH:mm" />
+                        <BitDatePicker @bind-Value="sectorBlockOnDates[index]" Label="@Localizer[nameof(AppStrings.BlockOn)]" />
+                        <BitTextField @bind-Value="sectorBlockOnTimes[index]" Label="@Localizer[nameof(AppStrings.Time)]" Placeholder="HH:mm" />
+                        <BitTextField @bind-Value="sectorTakeoffTimes[index]" Label="@Localizer[nameof(AppStrings.Takeoff)]" Placeholder="HH:mm" />
+                        <BitTextField @bind-Value="sectorLandingTimes[index]" Label="@Localizer[nameof(AppStrings.Landing)]" Placeholder="HH:mm" />
+                    </div>
+
+                    <div class="logbook-form-grid">
+                        <BitNumberField @bind-Value="sector.PicTimeMinutes" Label="@Localizer[nameof(AppStrings.PicTimeMinutes)]" />
+                        <BitNumberField @bind-Value="sector.SicTimeMinutes" Label="@Localizer[nameof(AppStrings.SicTimeMinutes)]" />
+                        <BitNumberField @bind-Value="sector.DualTimeMinutes" Label="@Localizer[nameof(AppStrings.DualTimeMinutes)]" />
+                        <BitCheckbox @bind-Value="sector.IsIfr" Label="@Localizer[nameof(AppStrings.Ifr)]" />
+                        <BitNumberField @bind-Value="sector.IfrTimeMinutes" Label="@Localizer[nameof(AppStrings.IfrTimeMinutes)]" />
+                        <BitCheckbox @bind-Value="sector.IsNight" Label="@Localizer[nameof(AppStrings.Night)]" />
+                        <BitNumberField @bind-Value="sector.NightTimeMinutes" Label="@Localizer[nameof(AppStrings.NightTimeMinutes)]" />
+                    </div>
+
+                    <div class="logbook-form-grid">
+                        <BitNumberField @bind-Value="sector.DayTakeoffs" Label="@Localizer[nameof(AppStrings.DayTakeoffs)]" />
+                        <BitNumberField @bind-Value="sector.NightTakeoffs" Label="@Localizer[nameof(AppStrings.NightTakeoffs)]" />
+                        <BitNumberField @bind-Value="sector.DayLandings" Label="@Localizer[nameof(AppStrings.DayLandings)]" />
+                        <BitNumberField @bind-Value="sector.NightLandings" Label="@Localizer[nameof(AppStrings.NightLandings)]" />
+                    </div>
+
+                    <BitText Typography="BitTypography.Body2" Color="BitColor.SecondaryForeground">
+                        @Localizer[nameof(AppStrings.BlockTime)]: @sector.BlockTimeDisplay ·
+                        @Localizer[nameof(AppStrings.FlightTime)]: @sector.FlightTimeDisplay
+                    </BitText>
+                </div>
+            }
+        </LogbookSection>
+
+        <LogbookSection Title="@Localizer[nameof(AppStrings.Crew)]"
+                        HeaderActions="@crewHeader">
+            @for (var i = 0; i < flightLog.Crew.Count; i++)
+            {
+                var index = i;
+                <BitStack Horizontal Wrap Gap="0.75rem" VerticalAlign="BitAlignment.End">
+                    <BitDropdown Items="crewItems"
+                                 NoValidate
+                                 Label="@Localizer[nameof(AppStrings.Crew)]"
+                                 Value="@(flightLog.Crew[index].CrewMemberId == Guid.Empty ? null : flightLog.Crew[index].CrewMemberId.ToString())"
+                                 OnChange="WrapHandled((string? v) => OnCrewChanged(index, v))" />
+                    <BitDropdown Items="roleItems"
+                                 NoValidate
+                                 Label="@Localizer[nameof(AppStrings.CrewRole)]"
+                                 Value="@flightLog.Crew[index].RoleType.ToString()"
+                                 OnChange="WrapHandled((string? v) => OnRoleChanged(index, v))" />
+                    @if (flightLog.Crew.Count > 1)
+                    {
+                        <BitButton ButtonType="BitButtonType.Button" IconOnly IconName="@BitIconName.Delete" OnClick="WrapHandled(() => RemoveCrew(index))" />
+                    }
+                </BitStack>
+            }
+        </LogbookSection>
+
+        <div class="logbook-totals-bar">
+            <div class="logbook-totals-chips">
+                <span class="logbook-total-chip">@Localizer[nameof(AppStrings.BlockTime)]: <FlightTimeDisplay Minutes="totalBlockMinutes" /></span>
+                <span class="logbook-total-chip">@Localizer[nameof(AppStrings.FlightTime)]: <FlightTimeDisplay Minutes="totalFlightMinutes" /></span>
+                <span class="logbook-total-chip">@Localizer[nameof(AppStrings.Pic)]: <FlightTimeDisplay Minutes="totalPicMinutes" /></span>
+                <span class="logbook-total-chip">@Localizer[nameof(AppStrings.Landings)]: @totalLandings</span>
+            </div>
+            <BitStack Horizontal Gap="0.5rem">
+                <BitButton Variant="BitVariant.Outline" Size="BitSize.Small" OnClick="WrapHandled(RecalculateTimes)">
+                    @Localizer[nameof(AppStrings.Refresh)]
+                </BitButton>
                 <BitButton Variant="BitVariant.Outline" Href="@PageUrls.FlightLogs">
                     @Localizer[nameof(AppStrings.Cancel)]
                 </BitButton>
@@ -172,6 +134,29 @@
                     @Localizer[nameof(AppStrings.Save)]
                 </BitButton>
             </BitStack>
-        </BitStack>
+        </div>
     </EditForm>
-</section>
+</LogbookWorkspace>
+
+@code {
+    private RenderFragment sectorHeader => __builder =>
+    {
+        <BitButton ButtonType="BitButtonType.Button"
+                   Size="BitSize.Small"
+                   Variant="BitVariant.Outline"
+                   IconName="@BitIconName.Add"
+                   OnClick="WrapHandled(AddSector)">
+            @Localizer[nameof(AppStrings.AddSector)]
+        </BitButton>
+    };
+
+    private RenderFragment crewHeader => __builder =>
+    {
+        <BitButton ButtonType="BitButtonType.Button"
+                   Size="BitSize.Small"
+                   Variant="BitVariant.Outline"
+                   OnClick="WrapHandled(AddCrew)">
+            @Localizer[nameof(AppStrings.AddCrew)]
+        </BitButton>
+    };
+}

@@ -7,65 +7,87 @@
 <AppPageData Title="@Localizer[nameof(AppStrings.FlightDetail)]"
              PageTitle="@Localizer[nameof(AppStrings.FlightDetailPageTitle)]" />
 
-<section>
+<LogbookWorkspace>
     @if (isLoading)
     {
         <BitRippleLoading />
     }
     else if (flight is not null)
     {
-        <BitStack Gap="1.5rem">
-            <BitStack Horizontal HorizontalAlign="BitAlignment.SpaceBetween">
-                <BitText Typography="BitTypography.H5">@flight.FlightDate.ToString("d") — @flight.AircraftRegistration</BitText>
-                <BitStack Horizontal Gap="0.5rem">
-                    <BitButton Href="@($"{PageUrls.AddOrEditFlightLog}/{flight.Id}")" IconName="@BitIconName.Edit">@Localizer[nameof(AppStrings.Edit)]</BitButton>
-                    <BitButton Color="BitColor.Error" IconName="@BitIconName.Delete" OnClick="WrapHandled(ConfirmDelete)">@Localizer[nameof(AppStrings.Delete)]</BitButton>
-                </BitStack>
-            </BitStack>
+        <div class="logbook-toolbar">
+            <BitText Typography="BitTypography.H5">@flight.FlightDate.ToString("d") · @flight.AircraftRegistration</BitText>
+            <BitSpacer />
+            <BitButton Href="@($"{PageUrls.AddOrEditFlightLog}/{flight.Id}")" IconName="@BitIconName.Edit" Variant="BitVariant.Outline">
+                @Localizer[nameof(AppStrings.Edit)]
+            </BitButton>
+            <BitButton Color="BitColor.Error" IconName="@BitIconName.Delete" Variant="BitVariant.Outline" OnClick="WrapHandled(ConfirmDelete)">
+                @Localizer[nameof(AppStrings.Delete)]
+            </BitButton>
+        </div>
 
-            <BitCard Style="padding:1rem">
-                <BitStack Gap="0.5rem">
-                    <BitText>@Localizer[nameof(AppStrings.Totals)]: @flight.TotalBlockTimeDisplay / @flight.TotalFlightTimeDisplay / PIC @flight.TotalPicTimeDisplay</BitText>
-                    <BitStack Horizontal Wrap Gap="1rem">
-                        <BitText>@Localizer[nameof(AppStrings.Sic)]: @flight.TotalSicTimeDisplay</BitText>
-                        <BitText>@Localizer[nameof(AppStrings.Dual)]: @flight.TotalDualTimeDisplay</BitText>
-                        <BitText>@Localizer[nameof(AppStrings.Night)]: @flight.TotalNightTimeDisplay</BitText>
-                        <BitText>@Localizer[nameof(AppStrings.Ifr)]: @flight.TotalIfrTimeDisplay</BitText>
-                        <BitText>@Localizer[nameof(AppStrings.Landings)]: @flight.TotalLandings</BitText>
-                    </BitStack>
-                    @if (string.IsNullOrWhiteSpace(flight.Remarks) is false)
-                    {
-                        <BitText>@Localizer[nameof(AppStrings.Remarks)]: @flight.Remarks</BitText>
-                    }
-                </BitStack>
-            </BitCard>
+        <div class="logbook-stats">
+            <div class="logbook-stat"><BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.BlockTime)]</BitText><BitText>@flight.TotalBlockTimeDisplay</BitText></div>
+            <div class="logbook-stat"><BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.FlightTime)]</BitText><BitText>@flight.TotalFlightTimeDisplay</BitText></div>
+            <div class="logbook-stat"><BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.Pic)]</BitText><BitText>@flight.TotalPicTimeDisplay</BitText></div>
+            <div class="logbook-stat"><BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.Landings)]</BitText><BitText>@flight.TotalLandings</BitText></div>
+        </div>
 
-            @foreach (var sector in flight.Sectors.OrderBy(s => s.SectorOrder))
-            {
-                <BitCard Style="padding:1rem" FullWidth>
-                    <BitText Typography="BitTypography.Subtitle1">@Localizer[nameof(AppStrings.Sector)] @sector.SectorOrder</BitText>
-                    <BitText>@sector.DepartureAirportDisplay → @sector.ArrivalAirportDisplay</BitText>
-                    <BitText Typography="BitTypography.Body2">
-                        @sector.BlockOff.ToString("u") — @sector.BlockOn.ToString("u") |
-                        @Localizer[nameof(AppStrings.BlockTime)]: @sector.BlockTimeDisplay |
-                        @Localizer[nameof(AppStrings.FlightTime)]: @sector.FlightTimeDisplay
-                    </BitText>
-                    <BitText Typography="BitTypography.Body2">
-                        PIC @sector.PicTimeDisplay |
-                        SIC @sector.SicTimeDisplay |
-                        @Localizer[nameof(AppStrings.Dual)]: @sector.DualTimeDisplay |
-                        @Localizer[nameof(AppStrings.Night)]: @sector.NightTimeDisplay |
-                        @Localizer[nameof(AppStrings.Ifr)]: @sector.IfrTimeDisplay
-                    </BitText>
-                </BitCard>
-            }
+        @if (string.IsNullOrWhiteSpace(flight.Remarks) is false)
+        {
+            <LogbookSection Title="@Localizer[nameof(AppStrings.Remarks)]">
+                <BitText>@flight.Remarks</BitText>
+            </LogbookSection>
+        }
 
-            <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.Crew)]</BitText>
-            @foreach (var crew in flight.Crew)
-            {
-                <BitText>@crew.CrewMemberName — @crew.RoleType</BitText>
-            }
-        </BitStack>
+        <LogbookSection Title="@Localizer[nameof(AppStrings.Sectors)]">
+            <div class="data-table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>@Localizer[nameof(AppStrings.Route)]</th>
+                            <th>@Localizer[nameof(AppStrings.BlockTime)]</th>
+                            <th>@Localizer[nameof(AppStrings.FlightTime)]</th>
+                            <th>PIC / SIC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var sector in flight.Sectors.OrderBy(s => s.SectorOrder))
+                        {
+                            <tr>
+                                <td>@sector.SectorOrder</td>
+                                <td class="primary-cell">@sector.DepartureAirportDisplay → @sector.ArrivalAirportDisplay</td>
+                                <td>@sector.BlockTimeDisplay</td>
+                                <td>@sector.FlightTimeDisplay</td>
+                                <td class="secondary-cell">@sector.PicTimeDisplay / @sector.SicTimeDisplay</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </LogbookSection>
+
+        <LogbookSection Title="@Localizer[nameof(AppStrings.Crew)]">
+            <div class="data-table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>@Localizer[nameof(AppStrings.Name)]</th>
+                            <th>@Localizer[nameof(AppStrings.CrewRole)]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var crew in flight.Crew)
+                        {
+                            <tr>
+                                <td class="primary-cell">@crew.CrewMemberName</td>
+                                <td>@crew.RoleType</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </LogbookSection>
 
         <BitDialog @bind-IsOpen="isDeleteDialogOpen"
                    Title="@Localizer[nameof(AppStrings.DeleteFlight)]"
@@ -73,4 +95,4 @@
             <BitText>@Localizer[nameof(AppStrings.AreYouSureDeleteFlight)]</BitText>
         </BitDialog>
     }
-</section>
+</LogbookWorkspace>

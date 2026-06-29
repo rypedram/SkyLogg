@@ -72,7 +72,7 @@ public partial class AirportsPage : BaseInfoPageBase
         editingAirport.TimeZoneDisplay = city.TimeZoneDisplay;
     }
 
-    private void EditAirport(AirportDto airport)
+    private void LoadAirport(AirportDto airport)
     {
         editingAirport = new AirportDto
         {
@@ -94,6 +94,8 @@ public partial class AirportsPage : BaseInfoPageBase
         CaptureFormSnapshot();
     }
 
+    private void EditAirport(AirportDto airport) => OpenEditForm(() => LoadAirport(airport));
+
     private async Task SaveAirport()
     {
         isSaving = true;
@@ -105,6 +107,7 @@ public partial class AirportsPage : BaseInfoPageBase
                 await airportController.Update(editingAirport, CurrentCancellationToken);
 
             ResetFormInternal();
+            CloseForm();
             await SearchAirports();
         }
         finally

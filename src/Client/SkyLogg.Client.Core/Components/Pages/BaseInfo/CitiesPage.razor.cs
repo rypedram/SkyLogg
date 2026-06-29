@@ -85,7 +85,7 @@ public partial class CitiesPage : BaseInfoPageBase
             editingCity.TimeZoneDisplay = timeZone.Label;
     }
 
-    private void EditCity(CityDto city)
+    private void LoadCity(CityDto city)
     {
         editingCity = new CityDto
         {
@@ -102,6 +102,8 @@ public partial class CitiesPage : BaseInfoPageBase
         CaptureFormSnapshot();
     }
 
+    private void EditCity(CityDto city) => OpenEditForm(() => LoadCity(city));
+
     private async Task SaveCity()
     {
         isSaving = true;
@@ -113,6 +115,7 @@ public partial class CitiesPage : BaseInfoPageBase
                 await cityController.Update(editingCity, CurrentCancellationToken);
 
             ResetFormInternal();
+            CloseForm();
             await SearchCities();
         }
         finally

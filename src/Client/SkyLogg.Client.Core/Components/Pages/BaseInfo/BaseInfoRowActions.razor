@@ -1,0 +1,20 @@
+@inherits AppComponentBase
+
+<BitStack Horizontal Gap="0.25rem" Class="actions">
+    <BitButton IconName="@BitIconName.Edit"
+               IconOnly
+               Title="@Localizer[nameof(AppStrings.Edit)]"
+               Variant="BitVariant.Outline"
+               OnClick="WrapHandled(OnEdit.InvokeAsync)" />
+    <BitButton IconName="@BitIconName.Delete"
+               IconOnly
+               Title="@Localizer[nameof(AppStrings.Delete)]"
+               Color="BitColor.Error"
+               Variant="BitVariant.Outline"
+               OnClick="WrapHandled(OnDelete.InvokeAsync)" />
+</BitStack>
+
+@code {
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+}

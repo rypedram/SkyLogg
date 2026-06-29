@@ -7,77 +7,86 @@
 <AppPageData Title="@Localizer[nameof(AppStrings.LogbookDashboard)]"
              PageTitle="@Localizer[nameof(AppStrings.LogbookDashboardPageTitle)]" />
 
-<section>
-    <BitStack Gap="2rem">
-        @if (isLoading)
-        {
-            <BitStack HorizontalAlign="BitAlignment.Center">
-                <BitRippleLoading />
-            </BitStack>
-        }
-        else if (currency is not null)
-        {
-            <BitStack Horizontal Wrap Gap="1rem">
-                <BitCard Style="padding:1rem;min-width:10rem">
-                    <BitStack Gap="0.5rem">
-                        <BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.TotalBlockHours)]</BitText>
-                        <FlightTimeDisplay Minutes="currency.TotalBlockMinutes" />
-                    </BitStack>
-                </BitCard>
-                <BitCard Style="padding:1rem;min-width:10rem">
-                    <BitStack Gap="0.5rem">
-                        <BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.TotalFlightHours)]</BitText>
-                        <FlightTimeDisplay Minutes="currency.TotalFlightMinutes" />
-                    </BitStack>
-                </BitCard>
-                <BitCard Style="padding:1rem;min-width:10rem">
-                    <BitStack Gap="0.5rem">
-                        <BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.PassengerCurrency)]</BitText>
-                        <BitText Color="@(currency.PassengerCurrencyMet ? BitColor.Success : BitColor.Error)">
-                            @currency.PassengerTakeoffs90Days / 3 T/O — @currency.PassengerLandings90Days / 3 LDG
-                        </BitText>
-                    </BitStack>
-                </BitCard>
-                <BitCard Style="padding:1rem;min-width:10rem">
-                    <BitStack Gap="0.5rem">
-                        <BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.NightCurrency)]</BitText>
-                        <BitText Color="@(currency.NightCurrencyMet ? BitColor.Success : BitColor.Error)">
-                            @currency.NightTakeoffs90Days / 3 — @currency.NightLandings90Days / 3
-                        </BitText>
-                    </BitStack>
-                </BitCard>
-            </BitStack>
-        }
+<LogbookWorkspace>
+    <div class="logbook-toolbar">
+        <BitButton IconName="@BitIconName.Add" Color="BitColor.Primary" Href="@PageUrls.AddOrEditFlightLog">
+            @Localizer[nameof(AppStrings.QuickAddFlight)]
+        </BitButton>
+        <BitButton Variant="BitVariant.Outline" IconName="@BitIconName.List" Href="@PageUrls.FlightLogs">
+            @Localizer[nameof(AppStrings.FlightLogs)]
+        </BitButton>
+        <BitButton Variant="BitVariant.Outline" IconName="@BitIconName.BarChartVerticalFill" Href="@PageUrls.FlightSummary">
+            @Localizer[nameof(AppStrings.FlightSummary)]
+        </BitButton>
+        <BitButton Variant="BitVariant.Outline" IconName="@BitIconName.MapPin" Href="@PageUrls.FlightMap">
+            @Localizer[nameof(AppStrings.FlightMap)]
+        </BitButton>
+    </div>
 
-        <BitStack Horizontal HorizontalAlign="BitAlignment.SpaceBetween" VerticalAlign="BitAlignment.Center">
-            <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.RecentFlights)]</BitText>
-            <BitButton IconName="@BitIconName.Add" Color="BitColor.Primary" Href="@PageUrls.AddOrEditFlightLog">
-                @Localizer[nameof(AppStrings.QuickAddFlight)]
-            </BitButton>
-        </BitStack>
+    @if (isLoading)
+    {
+        <BitRippleLoading />
+    }
+    else if (currency is not null)
+    {
+        <div class="logbook-stats">
+            <div class="logbook-stat">
+                <BitText Typography="BitTypography.Body2" Color="BitColor.SecondaryForeground">@Localizer[nameof(AppStrings.TotalBlockHours)]</BitText>
+                <FlightTimeDisplay Minutes="currency.TotalBlockMinutes" />
+            </div>
+            <div class="logbook-stat">
+                <BitText Typography="BitTypography.Body2" Color="BitColor.SecondaryForeground">@Localizer[nameof(AppStrings.TotalFlightHours)]</BitText>
+                <FlightTimeDisplay Minutes="currency.TotalFlightMinutes" />
+            </div>
+            <div class="logbook-stat">
+                <BitText Typography="BitTypography.Body2" Color="BitColor.SecondaryForeground">@Localizer[nameof(AppStrings.PassengerCurrency)]</BitText>
+                <BitText Color="@(currency.PassengerCurrencyMet ? BitColor.Success : BitColor.Error)">
+                    @currency.PassengerTakeoffs90Days/3 T/O · @currency.PassengerLandings90Days/3 LDG
+                </BitText>
+            </div>
+            <div class="logbook-stat">
+                <BitText Typography="BitTypography.Body2" Color="BitColor.SecondaryForeground">@Localizer[nameof(AppStrings.NightCurrency)]</BitText>
+                <BitText Color="@(currency.NightCurrencyMet ? BitColor.Success : BitColor.Error)">
+                    @currency.NightTakeoffs90Days/3 · @currency.NightLandings90Days/3
+                </BitText>
+            </div>
+        </div>
+    }
 
+    <LogbookSection Title="@Localizer[nameof(AppStrings.RecentFlights)]">
         @if (recentFlights.Count == 0 && isLoading is false)
         {
             <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoFlights)]</BitMessage>
         }
         else
         {
-            <BitStack Gap="0.5rem">
-                @foreach (var flight in recentFlights)
-                {
-                    <BitCard Style="padding:1rem" FullWidth>
-                        <BitLink Href="@($"{PageUrls.FlightLogDetail}/{flight.Id}")" NoUnderline>
-                            <BitStack Horizontal HorizontalAlign="BitAlignment.SpaceBetween">
-                                <BitStack Gap="0.25rem">
-                                    <BitText Typography="BitTypography.Body1">@flight.FlightDate.ToString("d") — @flight.AircraftRegistration</BitText>
-                                    <BitText Typography="BitTypography.Body2">@flight.RouteSummary</BitText>
-                                </BitStack>
-                                <FlightTimeDisplay Minutes="flight.TotalBlockMinutes" />
-                            </BitStack>
-                        </BitLink>
-                    </BitCard>
-                }
-            </BitStack>
+            <div class="data-table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>@Localizer[nameof(AppStrings.FlightDate)]</th>
+                            <th>@Localizer[nameof(AppStrings.Aircraft)]</th>
+                            <th>@Localizer[nameof(AppStrings.Route)]</th>
+                            <th>@Localizer[nameof(AppStrings.BlockTime)]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var flight in recentFlights)
+                        {
+                            <tr>
+                                <td>
+                                    <BitLink Class="flight-row-link" Href="@($"{PageUrls.FlightLogDetail}/{flight.Id}")" NoUnderline>
+                                        @flight.FlightDate.ToString("d")
+                                    </BitLink>
+                                </td>
+                                <td>@flight.AircraftRegistration</td>
+                                <td class="secondary-cell">@flight.RouteSummary</td>
+                                <td><FlightTimeDisplay Minutes="flight.TotalBlockMinutes" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
-    </BitStack>
-</section>
+    </LogbookSection>
+</LogbookWorkspace>

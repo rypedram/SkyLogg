@@ -7,41 +7,78 @@
 <AppPageData Title="@Localizer[nameof(AppStrings.FlightSummary)]"
              PageTitle="@Localizer[nameof(AppStrings.FlightSummaryPageTitle)]" />
 
-<section>
-    <BitStack Gap="1.5rem">
-        <BitStack Horizontal Wrap Gap="1rem">
-            <BitDatePicker @bind-Value="fromDate" Label="@Localizer[nameof(AppStrings.FromDate)]" />
-            <BitDatePicker @bind-Value="toDate" Label="@Localizer[nameof(AppStrings.ToDate)]" />
-            <BitButton OnClick="WrapHandled(LoadSummary)" IconName="@BitIconName.Refresh">@Localizer[nameof(AppStrings.Apply)]</BitButton>
-            <BitButton OnClick="WrapHandled(ExportCsv)" IconName="@BitIconName.ExcelDocument">CSV</BitButton>
-            <BitButton OnClick="WrapHandled(ExportPdf)" IconName="@BitIconName.PDF">PDF</BitButton>
-        </BitStack>
+<LogbookWorkspace>
+    <div class="logbook-toolbar">
+        <BitDatePicker @bind-Value="fromDate" Label="@Localizer[nameof(AppStrings.FromDate)]" />
+        <BitDatePicker @bind-Value="toDate" Label="@Localizer[nameof(AppStrings.ToDate)]" />
+        <BitButton OnClick="WrapHandled(LoadSummary)" IconName="@BitIconName.Refresh">@Localizer[nameof(AppStrings.Apply)]</BitButton>
+        <BitSpacer />
+        <BitButton OnClick="WrapHandled(ExportCsv)" IconName="@BitIconName.ExcelDocument" Variant="BitVariant.Outline">CSV</BitButton>
+        <BitButton OnClick="WrapHandled(ExportPdf)" IconName="@BitIconName.PDF" Variant="BitVariant.Outline">PDF</BitButton>
+    </div>
 
-        @if (isLoading)
-        {
-            <BitRippleLoading />
-        }
-        else if (summary is not null)
-        {
-            <BitStack Horizontal Wrap Gap="1rem">
-                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.TotalBlockHours)]</BitText><FlightTimeDisplay Minutes="summary.TotalBlockMinutes" /></BitCard>
-                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.TotalFlightHours)]</BitText><FlightTimeDisplay Minutes="summary.TotalFlightMinutes" /></BitCard>
-                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Night)]</BitText><FlightTimeDisplay Minutes="summary.TotalNightMinutes" /></BitCard>
-                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Ifr)]</BitText><FlightTimeDisplay Minutes="summary.TotalIfrMinutes" /></BitCard>
-                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.FlightCount)]</BitText><BitText>@summary.FlightCount</BitText></BitCard>
-            </BitStack>
+    @if (isLoading)
+    {
+        <BitRippleLoading />
+    }
+    else if (summary is not null)
+    {
+        <div class="logbook-stats">
+            <div class="logbook-stat"><BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.TotalBlockHours)]</BitText><FlightTimeDisplay Minutes="summary.TotalBlockMinutes" /></div>
+            <div class="logbook-stat"><BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.TotalFlightHours)]</BitText><FlightTimeDisplay Minutes="summary.TotalFlightMinutes" /></div>
+            <div class="logbook-stat"><BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.Night)]</BitText><FlightTimeDisplay Minutes="summary.TotalNightMinutes" /></div>
+            <div class="logbook-stat"><BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.Ifr)]</BitText><FlightTimeDisplay Minutes="summary.TotalIfrMinutes" /></div>
+            <div class="logbook-stat"><BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.FlightCount)]</BitText><BitText>@summary.FlightCount</BitText></div>
+        </div>
 
-            <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.AircraftUsage)]</BitText>
-            @foreach (var item in summary.AircraftUsage)
-            {
-                <BitText>@item.Registration — <FlightTimeDisplay Minutes="item.BlockMinutes" /> (@item.FlightCount)</BitText>
-            }
+        <div class="logbook-split">
+            <LogbookSection Title="@Localizer[nameof(AppStrings.AircraftUsage)]">
+                <div class="data-table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>@Localizer[nameof(AppStrings.Aircraft)]</th>
+                                <th>@Localizer[nameof(AppStrings.BlockTime)]</th>
+                                <th>@Localizer[nameof(AppStrings.FlightCount)]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in summary.AircraftUsage)
+                            {
+                                <tr>
+                                    <td class="primary-cell">@item.Registration</td>
+                                    <td><FlightTimeDisplay Minutes="item.BlockMinutes" /></td>
+                                    <td>@item.FlightCount</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </LogbookSection>
 
-            <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.TopAirports)]</BitText>
-            @foreach (var airport in summary.TopAirports)
-            {
-                <BitText>@airport.ICAO — @airport.Name (@airport.VisitCount)</BitText>
-            }
-        }
-    </BitStack>
-</section>
+            <LogbookSection Title="@Localizer[nameof(AppStrings.TopAirports)]">
+                <div class="data-table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ICAO</th>
+                                <th>@Localizer[nameof(AppStrings.Name)]</th>
+                                <th>@Localizer[nameof(AppStrings.FlightCount)]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var airport in summary.TopAirports)
+                            {
+                                <tr>
+                                    <td class="primary-cell">@airport.ICAO</td>
+                                    <td>@airport.Name</td>
+                                    <td>@airport.VisitCount</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </LogbookSection>
+        </div>
+    }
+</LogbookWorkspace>

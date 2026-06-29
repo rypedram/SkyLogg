@@ -38,7 +38,7 @@ public partial class CountriesPage : BaseInfoPageBase
         }
     }
 
-    private void EditCountry(CountryDto country)
+    private void LoadCountry(CountryDto country)
     {
         editingCountry = new CountryDto
         {
@@ -49,6 +49,8 @@ public partial class CountriesPage : BaseInfoPageBase
         };
         CaptureFormSnapshot();
     }
+
+    private void EditCountry(CountryDto country) => OpenEditForm(() => LoadCountry(country));
 
     private async Task SaveCountry()
     {
@@ -61,6 +63,7 @@ public partial class CountriesPage : BaseInfoPageBase
                 await countryController.Update(editingCountry, CurrentCancellationToken);
 
             ResetFormInternal();
+            CloseForm();
             await SearchCountries();
         }
         finally

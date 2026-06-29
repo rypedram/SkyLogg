@@ -60,7 +60,7 @@ public partial class CrewMembersPage : BaseInfoPageBase
             : null;
     }
 
-    private void EditCrew(CrewMemberDto crew)
+    private void LoadCrew(CrewMemberDto crew)
     {
         editingCrew = new CrewMemberDto
         {
@@ -82,6 +82,8 @@ public partial class CrewMembersPage : BaseInfoPageBase
         CaptureFormSnapshot();
     }
 
+    private void EditCrew(CrewMemberDto crew) => OpenEditForm(() => LoadCrew(crew));
+
     private async Task SaveCrew()
     {
         editingCrew.Birthday = birthdayDate.HasValue
@@ -97,6 +99,7 @@ public partial class CrewMembersPage : BaseInfoPageBase
                 await crewMemberController.Update(editingCrew, CurrentCancellationToken);
 
             ResetFormInternal();
+            CloseForm();
             await LoadCrew();
         }
         finally

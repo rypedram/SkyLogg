@@ -7,51 +7,58 @@
 <AppPageData Title="@Localizer[nameof(AppStrings.FlightImport)]"
              PageTitle="@Localizer[nameof(AppStrings.FlightImportPageTitle)]" />
 
-<section>
-    <BitStack Gap="1rem">
-        <BitCard Style="padding:1rem" FullWidth>
-            <BitStack Gap="1rem">
-                <BitText Typography="BitTypography.Body2">
-                    Camera, image, PDF, CSV, and Excel providers plug into the same OCR/AI import contract. The current provider accepts OCR/raw text where each line follows:
-                    date, aircraft, departure, arrival, block off, takeoff, landing, block on, remarks.
-                </BitText>
-                <BitTextField @bind-Value="rawText"
-                              Multiline
-                              Rows="8"
-                              Label="@Localizer[nameof(AppStrings.RawImportText)]" />
-                <BitButton Color="BitColor.Primary"
-                           IconName="@BitIconName.Preview"
-                           IsLoading="isPreviewing"
-                           OnClick="WrapHandled(PreviewImport)">
-                    @Localizer[nameof(AppStrings.PreviewImport)]
-                </BitButton>
-            </BitStack>
-        </BitCard>
+<LogbookWorkspace>
+    <LogbookSection Title="@Localizer[nameof(AppStrings.FlightImport)]">
+        <BitText Typography="BitTypography.Body2">
+            Paste OCR or raw text — one flight per line: date, aircraft, departure, arrival, block off, takeoff, landing, block on, remarks.
+        </BitText>
+        <BitTextField @bind-Value="rawText"
+                      Multiline
+                      Rows="8"
+                      Label="@Localizer[nameof(AppStrings.RawImportText)]" />
+        <BitButton Color="BitColor.Primary"
+                   IconName="@BitIconName.Preview"
+                   IsLoading="isPreviewing"
+                   OnClick="WrapHandled(PreviewImport)">
+            @Localizer[nameof(AppStrings.PreviewImport)]
+        </BitButton>
+    </LogbookSection>
 
-        @if (preview is not null)
-        {
-            <BitCard Style="padding:1rem" FullWidth>
-                <BitStack Gap="1rem">
-                    <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.ImportCandidates)]</BitText>
-                    @foreach (var candidate in preview.Candidates)
-                    {
-                        <BitCard Style="padding:1rem" FullWidth>
-                            <BitStack Gap="0.25rem">
-                                <BitText>@candidate.FlightDate?.ToString("d") — @candidate.AircraftRegistration</BitText>
-                                <BitText>@candidate.DepartureAirportCode → @candidate.ArrivalAirportCode</BitText>
-                                <BitText Typography="BitTypography.Body2">
-                                    @candidate.BlockOff / @candidate.Takeoff / @candidate.Landing / @candidate.BlockOn —
-                                    @Localizer[nameof(AppStrings.Confidence)]: @candidate.Confidence.ToString("P0")
-                                </BitText>
-                                @if (string.IsNullOrWhiteSpace(candidate.Remarks) is false)
-                                {
-                                    <BitText Typography="BitTypography.Body2">@candidate.Remarks</BitText>
-                                }
-                            </BitStack>
-                        </BitCard>
-                    }
-                </BitStack>
-            </BitCard>
-        }
-    </BitStack>
-</section>
+    @if (preview is not null)
+    {
+        <LogbookSection Title="@Localizer[nameof(AppStrings.ImportCandidates)]">
+            @if (preview.Candidates.Count == 0)
+            {
+                <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoFlights)]</BitMessage>
+            }
+            else
+            {
+                <div class="data-table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>@Localizer[nameof(AppStrings.FlightDate)]</th>
+                                <th>@Localizer[nameof(AppStrings.Aircraft)]</th>
+                                <th>@Localizer[nameof(AppStrings.Route)]</th>
+                                <th>@Localizer[nameof(AppStrings.BlockTime)]</th>
+                                <th>@Localizer[nameof(AppStrings.Confidence)]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var candidate in preview.Candidates)
+                            {
+                                <tr>
+                                    <td>@(candidate.FlightDate?.ToString("d") ?? "—")</td>
+                                    <td class="primary-cell">@candidate.AircraftRegistration</td>
+                                    <td class="secondary-cell">@candidate.DepartureAirportCode → @candidate.ArrivalAirportCode</td>
+                                    <td class="secondary-cell">@candidate.BlockOff / @candidate.BlockOn</td>
+                                    <td>@candidate.Confidence.ToString("P0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </LogbookSection>
+    }
+</LogbookWorkspace>

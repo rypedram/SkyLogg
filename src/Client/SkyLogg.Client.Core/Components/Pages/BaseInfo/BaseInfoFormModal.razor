@@ -1,0 +1,21 @@
+@inherits AppComponentBase
+
+<BitModal @bind-IsOpen="IsOpen" OnClose="WrapHandled(HandleClose)">
+    <BitStack Gap="1rem" Style="padding:1rem;min-width:min(100vw - 2rem, 32rem)">
+        <BitText Typography="BitTypography.H5">@Title</BitText>
+        @ChildContent
+    </BitStack>
+</BitModal>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public EventCallback OnCloseRequested { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private async Task HandleClose()
+    {
+        await OnCloseRequested.InvokeAsync();
+    }
+}

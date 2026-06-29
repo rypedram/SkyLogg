@@ -64,7 +64,7 @@ public partial class AircraftsPage : BaseInfoPageBase
         editingAircraft.AircraftTypeDisplay = aircraftType.DisplayName;
     }
 
-    private void EditAircraft(AircraftDto item)
+    private void LoadAircraft(AircraftDto item)
     {
         editingAircraft = new AircraftDto
         {
@@ -81,6 +81,8 @@ public partial class AircraftsPage : BaseInfoPageBase
         CaptureFormSnapshot();
     }
 
+    private void EditAircraft(AircraftDto item) => OpenEditForm(() => LoadAircraft(item));
+
     private async Task SaveAircraft()
     {
         isSaving = true;
@@ -92,6 +94,7 @@ public partial class AircraftsPage : BaseInfoPageBase
                 await aircraftController.Update(editingAircraft, CurrentCancellationToken);
 
             ResetFormInternal();
+            CloseForm();
             await LoadData();
         }
         finally

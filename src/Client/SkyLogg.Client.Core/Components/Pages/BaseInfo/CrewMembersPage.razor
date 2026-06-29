@@ -7,86 +7,89 @@
 <AppPageData Title="@Localizer[nameof(AppStrings.CrewMembers)]"
              PageTitle="@Localizer[nameof(AppStrings.CrewMembersPageTitle)]" />
 
-<section>
-    <BitStack Gap="1rem">
+<BaseInfoWorkspace>
+    <BaseInfoToolbar ShowSearch="false"
+                     AddButtonText="@Localizer[nameof(AppStrings.AddCrewMember)]"
+                     OnAdd="WrapHandled(() => OpenAddForm(ResetFormInternal))" />
+
+    @if (isLoading)
+    {
+        <BitRippleLoading />
+    }
+    else if (crewMembers.Count == 0)
+    {
+        <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoCrewMembers)]</BitMessage>
+    }
+    else
+    {
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>@Localizer[nameof(AppStrings.Name)]</th>
+                        <th>@Localizer[nameof(AppStrings.CrewPositionType)]</th>
+                        <th>@Localizer[nameof(AppStrings.LicenceNumber)]</th>
+                        <th>@Localizer[nameof(AppStrings.CrewRole)]</th>
+                        <th class="actions">@Localizer[nameof(AppStrings.Actions)]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var crew in crewMembers)
+                    {
+                        <tr>
+                            <td class="primary-cell">@crew.FullName</td>
+                            <td>@(crew.PositionType?.ToString() ?? "—")</td>
+                            <td>@(crew.LicenceNumber ?? "—")</td>
+                            <td class="secondary-cell">@(crew.DefaultRole?.ToString() ?? "—")</td>
+                            <td class="actions">
+                                <BaseInfoRowActions OnEdit="WrapHandled(() => OpenEditForm(() => LoadCrew(crew)))"
+                                                    OnDelete="WrapHandled(() => ConfirmDeleteCrew(crew))" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <BaseInfoFormModal @bind-IsOpen="isFormOpen"
+                       Title="@(editingCrew.Id == Guid.Empty ? Localizer[nameof(AppStrings.AddCrewMember)] : Localizer[nameof(AppStrings.UpdateCrewMember)])"
+                       OnCloseRequested="WrapHandled(() => RequestCloseForm(HasUnsavedChanges(), ResetFormInternal))">
         <EditForm Model="editingCrew" FormName="BaseInfoCrewForm" OnValidSubmit="WrapHandled(SaveCrew)">
             <DataAnnotationsValidator />
-            <BitCard Style="padding:1rem" FullWidth>
-                <BitStack Gap="1rem">
-                    <BitText Typography="BitTypography.H6">
-                        @(editingCrew.Id == Guid.Empty ? Localizer[nameof(AppStrings.AddCrewMember)] : Localizer[nameof(AppStrings.UpdateCrewMember)])
-                    </BitText>
-                    <BitStack Horizontal Wrap Gap="1rem">
-                        <BitTextField @bind-Value="editingCrew.FirstName" Name="CrewFirstName" Label="@Localizer[nameof(AppStrings.FirstName)]" />
-                        <BitTextField @bind-Value="editingCrew.LastName" Name="CrewLastName" Label="@Localizer[nameof(AppStrings.LastName)]" />
-                        <BitTextField @bind-Value="editingCrew.LicenceNumber" Name="CrewLicenceNumber" Label="@Localizer[nameof(AppStrings.LicenceNumber)]" />
-                    </BitStack>
-                    <BitStack Horizontal Wrap Gap="1rem">
-                        <BitDatePicker Responsive @bind-Value="birthdayDate"
-                                       Name="CrewBirthday"
-                                       Label="@Localizer[nameof(AppStrings.Birthday)]" />
-                        <BitDropdown Items="positionTypeItems"
-                                     NoValidate
-                                     Name="CrewPositionType"
-                                     Label="@Localizer[nameof(AppStrings.CrewPositionType)]"
-                                     Placeholder="@Localizer[nameof(AppStrings.SelectCrewPositionType)]"
-                                     Value="@selectedPositionTypeValue"
-                                     OnChange="WrapHandled((string? v) => OnPositionTypeChanged(v))" />
-                        <BitDropdown Items="crewRoleItems"
-                                     NoValidate
-                                     Name="CrewDefaultRole"
-                                     Label="@Localizer[nameof(AppStrings.CrewRole)]"
-                                     Placeholder="@Localizer[nameof(AppStrings.CrewRole)]"
-                                     Value="@selectedCrewRoleValue"
-                                     OnChange="WrapHandled((string? v) => OnCrewRoleChanged(v))" />
-                    </BitStack>
-                    <BitStack Horizontal Gap="0.5rem">
-                        <BitButton ButtonType="BitButtonType.Submit" Color="BitColor.Primary" IsLoading="isSaving">
-                            @(editingCrew.Id == Guid.Empty ? Localizer[nameof(AppStrings.Add)] : Localizer[nameof(AppStrings.Update)])
-                        </BitButton>
-                        <BitButton ButtonType="BitButtonType.Button" Variant="BitVariant.Outline" OnClick="WrapHandled(RequestResetForm)">
-                            @Localizer[nameof(AppStrings.Cancel)]
-                        </BitButton>
-                    </BitStack>
-                </BitStack>
-            </BitCard>
+            <div class="form-grid-wide">
+                <BitTextField @bind-Value="editingCrew.FirstName" Name="CrewFirstName" Label="@Localizer[nameof(AppStrings.FirstName)]" />
+                <BitTextField @bind-Value="editingCrew.LastName" Name="CrewLastName" Label="@Localizer[nameof(AppStrings.LastName)]" />
+                <BitTextField @bind-Value="editingCrew.LicenceNumber" Name="CrewLicenceNumber" Label="@Localizer[nameof(AppStrings.LicenceNumber)]" />
+                <BitDatePicker Responsive @bind-Value="birthdayDate"
+                               Name="CrewBirthday"
+                               Label="@Localizer[nameof(AppStrings.Birthday)]" />
+                <BitDropdown Items="positionTypeItems"
+                             NoValidate
+                             Name="CrewPositionType"
+                             Label="@Localizer[nameof(AppStrings.CrewPositionType)]"
+                             Placeholder="@Localizer[nameof(AppStrings.SelectCrewPositionType)]"
+                             Value="@selectedPositionTypeValue"
+                             OnChange="WrapHandled((string? v) => OnPositionTypeChanged(v))" />
+                <BitDropdown Items="crewRoleItems"
+                             NoValidate
+                             Name="CrewDefaultRole"
+                             Label="@Localizer[nameof(AppStrings.CrewRole)]"
+                             Placeholder="@Localizer[nameof(AppStrings.CrewRole)]"
+                             Value="@selectedCrewRoleValue"
+                             OnChange="WrapHandled((string? v) => OnCrewRoleChanged(v))" />
+            </div>
+            <div class="form-actions">
+                <BitButton ButtonType="BitButtonType.Submit" Color="BitColor.Primary" IsLoading="isSaving">
+                    @(editingCrew.Id == Guid.Empty ? Localizer[nameof(AppStrings.Add)] : Localizer[nameof(AppStrings.Update)])
+                </BitButton>
+                <BitButton ButtonType="BitButtonType.Button" Variant="BitVariant.Outline" OnClick="WrapHandled(() => RequestCloseForm(HasUnsavedChanges(), ResetFormInternal))">
+                    @Localizer[nameof(AppStrings.Cancel)]
+                </BitButton>
+            </div>
         </EditForm>
-
-        @if (isLoading)
-        {
-            <BitRippleLoading />
-        }
-        else if (crewMembers.Count == 0)
-        {
-            <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoCrewMembers)]</BitMessage>
-        }
-        else
-        {
-            @foreach (var crew in crewMembers)
-            {
-                <BitCard Style="padding:1rem" FullWidth>
-                    <BitStack Horizontal Wrap HorizontalAlign="BitAlignment.SpaceBetween" Gap="1rem">
-                        <BitStack Gap="0.25rem">
-                            <BitText Typography="BitTypography.Subtitle1">@crew.FullName</BitText>
-                            <BitText Typography="BitTypography.Body2">
-                                @(crew.PositionType?.ToString() ?? "—") · @(crew.LicenceNumber ?? "—")
-                                @(crew.Birthday is null ? "" : $" · {crew.Birthday:d}")
-                            </BitText>
-                        </BitStack>
-                        <BitStack Horizontal Gap="0.5rem">
-                            <BitButton IconName="@BitIconName.Edit" Variant="BitVariant.Outline" OnClick="WrapHandled(() => EditCrew(crew))">
-                                @Localizer[nameof(AppStrings.Edit)]
-                            </BitButton>
-                            <BitButton IconName="@BitIconName.Delete" Color="BitColor.Error" Variant="BitVariant.Outline" OnClick="WrapHandled(() => ConfirmDeleteCrew(crew))">
-                                @Localizer[nameof(AppStrings.Delete)]
-                            </BitButton>
-                        </BitStack>
-                    </BitStack>
-                </BitCard>
-            }
-        }
-    </BitStack>
-</section>
+    </BaseInfoFormModal>
+</BaseInfoWorkspace>
 
 <BaseInfoConfirmDialogs @bind-IsDeleteDialogOpen="isDeleteDialogOpen"
                         DeleteMessage="@Localizer.GetString(nameof(AppStrings.AreYouSureWannaDelete), deleteTargetName ?? string.Empty)"

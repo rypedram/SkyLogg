@@ -7,82 +7,85 @@
 <AppPageData Title="@Localizer[nameof(AppStrings.Cities)]"
              PageTitle="@Localizer[nameof(AppStrings.CitiesPageTitle)]" />
 
-<section>
-    <BitStack Gap="1rem">
+<BaseInfoWorkspace>
+    <BaseInfoToolbar @bind-SearchText="searchText"
+                     SearchPlaceholder="@Localizer[nameof(AppStrings.SearchCitiesPlaceholder)]"
+                     OnSearch="WrapHandled(SearchCities)"
+                     AddButtonText="@Localizer[nameof(AppStrings.AddCity)]"
+                     OnAdd="WrapHandled(() => OpenAddForm(ResetFormInternal))" />
+
+    @if (isLoading)
+    {
+        <BitRippleLoading />
+    }
+    else if (cities.Count == 0)
+    {
+        <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoCities)]</BitMessage>
+    }
+    else
+    {
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>@Localizer[nameof(AppStrings.City)]</th>
+                        <th>@Localizer[nameof(AppStrings.Country)]</th>
+                        <th>@Localizer[nameof(AppStrings.TimeZone)]</th>
+                        <th class="actions">@Localizer[nameof(AppStrings.Actions)]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var city in cities)
+                    {
+                        <tr>
+                            <td class="primary-cell">@city.Name</td>
+                            <td>@city.CountryName</td>
+                            <td class="secondary-cell">@city.TimeZoneDisplay</td>
+                            <td class="actions">
+                                <BaseInfoRowActions OnEdit="WrapHandled(() => OpenEditForm(() => LoadCity(city)))"
+                                                    OnDelete="WrapHandled(() => ConfirmDeleteCity(city))" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <BaseInfoFormModal @bind-IsOpen="isFormOpen"
+                       Title="@(editingCity.Id == Guid.Empty ? Localizer[nameof(AppStrings.AddCity)] : Localizer[nameof(AppStrings.UpdateCity)])"
+                       OnCloseRequested="WrapHandled(() => RequestCloseForm(HasUnsavedChanges(), ResetFormInternal))">
         <EditForm Model="editingCity" FormName="BaseInfoCityForm" OnValidSubmit="WrapHandled(SaveCity)">
             <DataAnnotationsValidator />
-            <BitCard Style="padding:1rem" FullWidth>
-                <BitStack Gap="1rem">
-                    <BitText Typography="BitTypography.H6">
-                        @(editingCity.Id == Guid.Empty ? Localizer[nameof(AppStrings.AddCity)] : Localizer[nameof(AppStrings.UpdateCity)])
-                    </BitText>
-                    <BitStack Horizontal Wrap Gap="1rem">
-                        <BitTextField @bind-Value="editingCity.Name" Name="CityName" Label="@Localizer[nameof(AppStrings.City)]" />
-                        <BitDropdown Items="countryItems"
-                                     NoValidate
-                                     Name="CityCountryId"
-                                     Label="@Localizer[nameof(AppStrings.Country)]"
-                                     Placeholder="@Localizer[nameof(AppStrings.SelectCountry)]"
-                                     Value="@selectedCountryValue"
-                                     OnChange="WrapHandled((string? v) => OnCountryChanged(v))" />
-                        <BitDropdown Items="timeZoneItems"
-                                     NoValidate
-                                     Name="CityTimeZoneId"
-                                     Label="@Localizer[nameof(AppStrings.TimeZone)]"
-                                     Placeholder="@Localizer[nameof(AppStrings.SelectTimeZone)]"
-                                     Value="@selectedTimeZoneValue"
-                                     OnChange="WrapHandled((string? v) => OnTimeZoneChanged(v))" />
-                        <BitCheckbox @bind-Value="IsFormActive" Name="CityIsActive" Label="@Localizer[nameof(AppStrings.Active)]" />
-                    </BitStack>
-                    <BitStack Horizontal Gap="0.5rem">
-                        <BitButton ButtonType="BitButtonType.Submit" Color="BitColor.Primary" IsLoading="isSaving">
-                            @(editingCity.Id == Guid.Empty ? Localizer[nameof(AppStrings.Add)] : Localizer[nameof(AppStrings.Update)])
-                        </BitButton>
-                        <BitButton ButtonType="BitButtonType.Button" Variant="BitVariant.Outline" OnClick="WrapHandled(RequestResetForm)">
-                            @Localizer[nameof(AppStrings.Cancel)]
-                        </BitButton>
-                    </BitStack>
-                </BitStack>
-            </BitCard>
+            <div class="form-grid-wide">
+                <BitTextField @bind-Value="editingCity.Name" Name="CityName" Label="@Localizer[nameof(AppStrings.City)]" />
+                <BitDropdown Items="countryItems"
+                             NoValidate
+                             Name="CityCountryId"
+                             Label="@Localizer[nameof(AppStrings.Country)]"
+                             Placeholder="@Localizer[nameof(AppStrings.SelectCountry)]"
+                             Value="@selectedCountryValue"
+                             OnChange="WrapHandled((string? v) => OnCountryChanged(v))" />
+                <BitDropdown Items="timeZoneItems"
+                             NoValidate
+                             Name="CityTimeZoneId"
+                             Label="@Localizer[nameof(AppStrings.TimeZone)]"
+                             Placeholder="@Localizer[nameof(AppStrings.SelectTimeZone)]"
+                             Value="@selectedTimeZoneValue"
+                             OnChange="WrapHandled((string? v) => OnTimeZoneChanged(v))" />
+                <BitCheckbox @bind-Value="IsFormActive" Name="CityIsActive" Label="@Localizer[nameof(AppStrings.Active)]" />
+            </div>
+            <div class="form-actions">
+                <BitButton ButtonType="BitButtonType.Submit" Color="BitColor.Primary" IsLoading="isSaving">
+                    @(editingCity.Id == Guid.Empty ? Localizer[nameof(AppStrings.Add)] : Localizer[nameof(AppStrings.Update)])
+                </BitButton>
+                <BitButton ButtonType="BitButtonType.Button" Variant="BitVariant.Outline" OnClick="WrapHandled(() => RequestCloseForm(HasUnsavedChanges(), ResetFormInternal))">
+                    @Localizer[nameof(AppStrings.Cancel)]
+                </BitButton>
+            </div>
         </EditForm>
-
-        <BitSearchBox @bind-Value="searchText"
-                      Placeholder="@Localizer[nameof(AppStrings.SearchCitiesPlaceholder)]"
-                      OnChange="WrapHandled(SearchCities)"
-                      Immediate DebounceTime="300" />
-
-        @if (isLoading)
-        {
-            <BitRippleLoading />
-        }
-        else if (cities.Count == 0)
-        {
-            <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoCities)]</BitMessage>
-        }
-        else
-        {
-            @foreach (var city in cities)
-            {
-                <BitCard Style="padding:1rem" FullWidth>
-                    <BitStack Horizontal Wrap HorizontalAlign="BitAlignment.SpaceBetween" Gap="1rem">
-                        <BitStack Gap="0.25rem">
-                            <BitText Typography="BitTypography.Subtitle1">@city.DisplayName</BitText>
-                            <BitText Typography="BitTypography.Body2">@city.TimeZoneDisplay</BitText>
-                        </BitStack>
-                        <BitStack Horizontal Gap="0.5rem">
-                            <BitButton IconName="@BitIconName.Edit" Variant="BitVariant.Outline" OnClick="WrapHandled(() => EditCity(city))">
-                                @Localizer[nameof(AppStrings.Edit)]
-                            </BitButton>
-                            <BitButton IconName="@BitIconName.Delete" Color="BitColor.Error" Variant="BitVariant.Outline" OnClick="WrapHandled(() => ConfirmDeleteCity(city))">
-                                @Localizer[nameof(AppStrings.Delete)]
-                            </BitButton>
-                        </BitStack>
-                    </BitStack>
-                </BitCard>
-            }
-        }
-    </BitStack>
-</section>
+    </BaseInfoFormModal>
+</BaseInfoWorkspace>
 
 <BaseInfoConfirmDialogs @bind-IsDeleteDialogOpen="isDeleteDialogOpen"
                         DeleteMessage="@Localizer.GetString(nameof(AppStrings.AreYouSureWannaDelete), deleteTargetName ?? string.Empty)"

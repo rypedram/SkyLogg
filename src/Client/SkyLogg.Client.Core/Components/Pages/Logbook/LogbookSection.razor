@@ -1,0 +1,20 @@
+@inherits AppComponentBase
+
+<div class="logbook-section">
+    <div class="logbook-section-header">
+        <BitText Typography="BitTypography.Subtitle1">@Title</BitText>
+        @if (HeaderActions is not null)
+        {
+            @HeaderActions
+        }
+    </div>
+    <div class="logbook-section-body">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? HeaderActions { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

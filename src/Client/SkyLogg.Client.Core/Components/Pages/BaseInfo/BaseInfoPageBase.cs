@@ -2,10 +2,44 @@ namespace SkyLogg.Client.Core.Components.Pages.BaseInfo;
 
 public partial class BaseInfoPageBase : AppPageBase
 {
+    protected bool isFormOpen;
     protected bool isDeleteDialogOpen;
     protected bool isDiscardDialogOpen;
     protected string? deleteTargetName;
     private Action? pendingResetAction;
+
+    protected void OpenForm() => isFormOpen = true;
+
+    protected void CloseForm() => isFormOpen = false;
+
+    protected void OpenAddForm(Action resetForm)
+    {
+        resetForm();
+        OpenForm();
+    }
+
+    protected void OpenEditForm(Action loadForm)
+    {
+        loadForm();
+        OpenForm();
+    }
+
+    protected void RequestCloseForm(bool hasUnsavedChanges, Action resetForm)
+    {
+        if (hasUnsavedChanges)
+        {
+            pendingResetAction = () =>
+            {
+                resetForm();
+                CloseForm();
+            };
+            isDiscardDialogOpen = true;
+            return;
+        }
+
+        resetForm();
+        CloseForm();
+    }
 
     protected void OpenDeleteDialog(string displayName)
     {
@@ -32,14 +66,7 @@ public partial class BaseInfoPageBase : AppPageBase
 
     protected void RequestCancel(bool hasUnsavedChanges, Action resetAction)
     {
-        if (hasUnsavedChanges)
-        {
-            pendingResetAction = resetAction;
-            isDiscardDialogOpen = true;
-            return;
-        }
-
-        resetAction();
+        RequestCloseForm(hasUnsavedChanges, resetAction);
     }
 
     protected void ConfirmDiscard()
