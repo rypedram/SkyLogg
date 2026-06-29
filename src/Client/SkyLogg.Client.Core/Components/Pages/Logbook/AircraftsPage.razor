@@ -1,0 +1,88 @@
+@attribute [Route(PageUrls.AircraftList)]
+@attribute [Route("{culture?}" + PageUrls.AircraftList)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFleet)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.Aircrafts)]"
+             PageTitle="@Localizer[nameof(AppStrings.AircraftsPageTitle)]" />
+
+<section>
+    <BitStack Gap="1rem">
+        <EditForm Model="editingAircraft" FormName="LogbookAircraftForm" OnValidSubmit="WrapHandled(SaveAircraft)">
+            <DataAnnotationsValidator />
+            <BitCard Style="padding:1rem" FullWidth>
+                <BitStack Gap="1rem">
+                    <BitText Typography="BitTypography.H6">
+                        @(editingAircraft.Id == Guid.Empty ? Localizer[nameof(AppStrings.AddAircraft)] : Localizer[nameof(AppStrings.UpdateAircraft)])
+                    </BitText>
+                    <BitTextField @bind-Value="editingAircraft.Registration"
+                                  Label="@Localizer[nameof(AppStrings.Registration)]" />
+                    <BitDropdown Items="aircraftTypeItems"
+                                 Label="@Localizer[nameof(AppStrings.AircraftType)]"
+                                 Placeholder="@Localizer[nameof(AppStrings.SelectAircraftType)]"
+                                 Value="@selectedAircraftTypeValue"
+                                 OnChange="WrapHandled((string? v) => OnAircraftTypeChanged(v))" />
+                    <BitStack Horizontal Wrap Gap="1rem">
+                        <BitTextField @bind-Value="editingAircraft.Type"
+                                      Label="@Localizer[nameof(AppStrings.AircraftCategory)]" />
+                        <BitTextField @bind-Value="editingAircraft.Model"
+                                      Label="@Localizer[nameof(AppStrings.AircraftModel)]" />
+                        <BitCheckbox @bind-Value="editingAircraft.IsActive"
+                                     Label="@Localizer[nameof(AppStrings.Active)]" />
+                    </BitStack>
+                    <BitStack Horizontal Gap="0.5rem">
+                        <BitButton ButtonType="BitButtonType.Submit"
+                                   Color="BitColor.Primary"
+                                   IsLoading="isSaving">
+                            @(editingAircraft.Id == Guid.Empty ? Localizer[nameof(AppStrings.Add)] : Localizer[nameof(AppStrings.Update)])
+                        </BitButton>
+                        <BitButton Variant="BitVariant.Outline"
+                                   OnClick="WrapHandled(ResetForm)">
+                            @Localizer[nameof(AppStrings.Cancel)]
+                        </BitButton>
+                    </BitStack>
+                </BitStack>
+            </BitCard>
+        </EditForm>
+
+        @if (isLoading)
+        {
+            <BitRippleLoading />
+        }
+        else if (aircraft.Count == 0)
+        {
+            <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoAircraft)]</BitMessage>
+        }
+        else
+        {
+            @foreach (var item in aircraft)
+            {
+                <BitCard Style="padding:1rem" FullWidth>
+                    <BitStack Horizontal Wrap HorizontalAlign="BitAlignment.SpaceBetween" Gap="1rem">
+                        <BitStack Gap="0.25rem">
+                            <BitText Typography="BitTypography.Subtitle1">@item.Registration</BitText>
+                            <BitText Typography="BitTypography.Body2">
+                                @(item.AircraftTypeDisplay ?? $"{item.Type} {item.Model}") —
+                                @(item.IsActive ? Localizer[nameof(AppStrings.Active)] : Localizer[nameof(AppStrings.Canceled)])
+                            </BitText>
+                        </BitStack>
+                        <BitStack Horizontal Gap="0.5rem">
+                            <BitButton IconName="@BitIconName.Edit"
+                                       Variant="BitVariant.Outline"
+                                       OnClick="WrapHandled(() => EditAircraft(item))">
+                                @Localizer[nameof(AppStrings.Edit)]
+                            </BitButton>
+                            <BitButton IconName="@BitIconName.Delete"
+                                       Color="BitColor.Error"
+                                       Variant="BitVariant.Outline"
+                                       OnClick="WrapHandled(() => DeactivateAircraft(item))">
+                                @Localizer[nameof(AppStrings.Delete)]
+                            </BitButton>
+                        </BitStack>
+                    </BitStack>
+                </BitCard>
+            }
+        }
+    </BitStack>
+</section>

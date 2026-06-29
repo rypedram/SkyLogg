@@ -1,0 +1,26 @@
+@inherits LayoutComponentBase
+
+<CascadingValue Value="currentDir">
+    <CascadingValue Value="currentUser">
+        <CascadingValue Value="currentTheme">
+            <CascadingValue Value="currentRouteData">
+                <CascadingValue Name="@Parameters.IsOnline" Value="IsOnline">
+
+                    <AppHeadContents />
+
+                    <AppShell NavPanelItems="navPanelItems" IsIdentityPage="isIdentityPage">
+                        @Body
+                    </AppShell>
+
+                    <ForceUpdateSnackBar />
+                    <AppSnackBar />
+                    <AppDiagnosticModal />
+                    <JobProgress />
+                    <BitModalContainer ModalParameters="ModalParameters" />
+                    <AppJsBridge />
+
+                </CascadingValue>
+            </CascadingValue>
+        </CascadingValue>
+    </CascadingValue>
+</CascadingValue>

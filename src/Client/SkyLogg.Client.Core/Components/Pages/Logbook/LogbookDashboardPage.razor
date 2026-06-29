@@ -1,0 +1,83 @@
+@attribute [Route(PageUrls.Logbook)]
+@attribute [Route("{culture?}" + PageUrls.Logbook)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFlightLogs)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.LogbookDashboard)]"
+             PageTitle="@Localizer[nameof(AppStrings.LogbookDashboardPageTitle)]" />
+
+<section>
+    <BitStack Gap="2rem">
+        @if (isLoading)
+        {
+            <BitStack HorizontalAlign="BitAlignment.Center">
+                <BitRippleLoading />
+            </BitStack>
+        }
+        else if (currency is not null)
+        {
+            <BitStack Horizontal Wrap Gap="1rem">
+                <BitCard Style="padding:1rem;min-width:10rem">
+                    <BitStack Gap="0.5rem">
+                        <BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.TotalBlockHours)]</BitText>
+                        <FlightTimeDisplay Minutes="currency.TotalBlockMinutes" />
+                    </BitStack>
+                </BitCard>
+                <BitCard Style="padding:1rem;min-width:10rem">
+                    <BitStack Gap="0.5rem">
+                        <BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.TotalFlightHours)]</BitText>
+                        <FlightTimeDisplay Minutes="currency.TotalFlightMinutes" />
+                    </BitStack>
+                </BitCard>
+                <BitCard Style="padding:1rem;min-width:10rem">
+                    <BitStack Gap="0.5rem">
+                        <BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.PassengerCurrency)]</BitText>
+                        <BitText Color="@(currency.PassengerCurrencyMet ? BitColor.Success : BitColor.Error)">
+                            @currency.PassengerTakeoffs90Days / 3 T/O — @currency.PassengerLandings90Days / 3 LDG
+                        </BitText>
+                    </BitStack>
+                </BitCard>
+                <BitCard Style="padding:1rem;min-width:10rem">
+                    <BitStack Gap="0.5rem">
+                        <BitText Typography="BitTypography.Body2">@Localizer[nameof(AppStrings.NightCurrency)]</BitText>
+                        <BitText Color="@(currency.NightCurrencyMet ? BitColor.Success : BitColor.Error)">
+                            @currency.NightTakeoffs90Days / 3 — @currency.NightLandings90Days / 3
+                        </BitText>
+                    </BitStack>
+                </BitCard>
+            </BitStack>
+        }
+
+        <BitStack Horizontal HorizontalAlign="BitAlignment.SpaceBetween" VerticalAlign="BitAlignment.Center">
+            <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.RecentFlights)]</BitText>
+            <BitButton IconName="@BitIconName.Add" Color="BitColor.Primary" Href="@PageUrls.AddOrEditFlightLog">
+                @Localizer[nameof(AppStrings.QuickAddFlight)]
+            </BitButton>
+        </BitStack>
+
+        @if (recentFlights.Count == 0 && isLoading is false)
+        {
+            <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoFlights)]</BitMessage>
+        }
+        else
+        {
+            <BitStack Gap="0.5rem">
+                @foreach (var flight in recentFlights)
+                {
+                    <BitCard Style="padding:1rem" FullWidth>
+                        <BitLink Href="@($"{PageUrls.FlightLogDetail}/{flight.Id}")" NoUnderline>
+                            <BitStack Horizontal HorizontalAlign="BitAlignment.SpaceBetween">
+                                <BitStack Gap="0.25rem">
+                                    <BitText Typography="BitTypography.Body1">@flight.FlightDate.ToString("d") — @flight.AircraftRegistration</BitText>
+                                    <BitText Typography="BitTypography.Body2">@flight.RouteSummary</BitText>
+                                </BitStack>
+                                <FlightTimeDisplay Minutes="flight.TotalBlockMinutes" />
+                            </BitStack>
+                        </BitLink>
+                    </BitCard>
+                }
+            </BitStack>
+        }
+    </BitStack>
+</section>

@@ -1,0 +1,67 @@
+@attribute [Route(PageUrls.FlightReports)]
+@attribute [Route("{culture?}" + PageUrls.FlightReports)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFlightLogs)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.Reports)]"
+             PageTitle="@Localizer[nameof(AppStrings.ReportsPageTitle)]" />
+
+<section>
+    @if (isLoading)
+    {
+        <BitRippleLoading />
+    }
+    else if (statistics is not null)
+    {
+        <BitStack Gap="1rem">
+            <BitStack Horizontal Wrap Gap="1rem">
+                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.TotalFlightHours)]</BitText><FlightTimeDisplay Minutes="statistics.TotalFlightMinutes" /></BitCard>
+                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Night)]</BitText><FlightTimeDisplay Minutes="statistics.TotalNightMinutes" /></BitCard>
+                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Ifr)]</BitText><FlightTimeDisplay Minutes="statistics.TotalIfrMinutes" /></BitCard>
+                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.TotalFlights)]</BitText><BitText>@statistics.FlightCount</BitText></BitCard>
+            </BitStack>
+
+            <BitStack Horizontal Wrap Gap="1rem">
+                <BitCard Style="padding:1rem" FullWidth>
+                    <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.LongestFlight)]</BitText>
+                    <BitText>@FormatFlightStatistic(statistics.LongestFlight)</BitText>
+                </BitCard>
+                <BitCard Style="padding:1rem" FullWidth>
+                    <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.ShortestFlight)]</BitText>
+                    <BitText>@FormatFlightStatistic(statistics.ShortestFlight)</BitText>
+                </BitCard>
+            </BitStack>
+
+            <BitCard Style="padding:1rem" FullWidth>
+                <BitStack Gap="0.5rem">
+                    <BitText>@Localizer[nameof(AppStrings.MostUsedAircraft)]: @statistics.MostUsedAircraft</BitText>
+                    <BitText>@Localizer[nameof(AppStrings.MostVisitedAirport)]: @statistics.MostVisitedAirport</BitText>
+                </BitStack>
+            </BitCard>
+
+            <BitCard Style="padding:1rem" FullWidth>
+                <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.MonthlyTrends)]</BitText>
+                @foreach (var trend in statistics.MonthlyTrends.TakeLast(12))
+                {
+                    <BitText>@trend.Year/@trend.Month.ToString("00") — <FlightTimeDisplay Minutes="trend.FlightMinutes" /> (@trend.FlightCount)</BitText>
+                }
+            </BitCard>
+
+            <BitCard Style="padding:1rem" FullWidth>
+                <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.Achievements)]</BitText>
+                @foreach (var achievement in achievements)
+                {
+                    <BitStack Horizontal Wrap HorizontalAlign="BitAlignment.SpaceBetween" Gap="1rem">
+                        <BitStack Gap="0.25rem">
+                            <BitText>@achievement.Name</BitText>
+                            <BitText Typography="BitTypography.Body2">@achievement.Description</BitText>
+                        </BitStack>
+                        <BitText>@achievement.CurrentValue / @achievement.Threshold @(achievement.IsUnlocked ? "Unlocked" : "")</BitText>
+                    </BitStack>
+                    <BitSeparator />
+                }
+            </BitCard>
+        </BitStack>
+    }
+</section>

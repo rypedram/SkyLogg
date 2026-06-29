@@ -1,0 +1,110 @@
+using SkyLogg.Shared.Features.Logbook;
+
+namespace SkyLogg.Server.Api.Features.Logbook;
+
+public static partial class LogbookMapper
+{
+    public static FlightLogDto MapFull(FlightLog source)
+    {
+        return new FlightLogDto
+        {
+            Id = source.Id,
+            FlightDate = source.FlightDate,
+            AircraftId = source.AircraftId,
+            AircraftRegistration = source.Aircraft?.Registration,
+            AircraftType = source.Aircraft?.Type,
+            Remarks = source.Remarks,
+            TotalBlockMinutes = source.TotalBlockMinutes,
+            TotalFlightMinutes = source.TotalFlightMinutes,
+            TotalPicMinutes = source.TotalPicMinutes,
+            TotalSicMinutes = source.TotalSicMinutes,
+            TotalDualMinutes = source.TotalDualMinutes,
+            TotalNightMinutes = source.TotalNightMinutes,
+            TotalIfrMinutes = source.TotalIfrMinutes,
+            TotalLandings = source.TotalLandings,
+            Version = source.Version,
+            CreatedOn = source.CreatedOn,
+            Sectors = source.Sectors.OrderBy(s => s.SectorOrder).Select(s => new FlightSectorDto
+            {
+                Id = s.Id,
+                SectorOrder = s.SectorOrder,
+                DepartureAirportId = s.DepartureAirportId,
+                DepartureAirportDisplay = s.DepartureAirport is null ? null : $"{s.DepartureAirport.ICAO} — {s.DepartureAirport.Name}",
+                ArrivalAirportId = s.ArrivalAirportId,
+                ArrivalAirportDisplay = s.ArrivalAirport is null ? null : $"{s.ArrivalAirport.ICAO} — {s.ArrivalAirport.Name}",
+                BlockOff = s.BlockOff,
+                BlockOn = s.BlockOn,
+                Takeoff = s.Takeoff,
+                Landing = s.Landing,
+                BlockTimeMinutes = s.BlockTimeMinutes,
+                FlightTimeMinutes = s.FlightTimeMinutes,
+                PicTimeMinutes = s.PicTimeMinutes,
+                SicTimeMinutes = s.SicTimeMinutes,
+                DualTimeMinutes = s.DualTimeMinutes,
+                NightTimeMinutes = s.NightTimeMinutes,
+                IfrTimeMinutes = s.IfrTimeMinutes,
+                IsIfr = s.IsIfr,
+                IsNight = s.IsNight,
+                DayTakeoffs = s.DayTakeoffs,
+                NightTakeoffs = s.NightTakeoffs,
+                DayLandings = s.DayLandings,
+                NightLandings = s.NightLandings,
+            }).ToList(),
+            Crew = source.CrewAssignments.Select(c => new FlightLogCrewDto
+            {
+                CrewMemberId = c.CrewMemberId,
+                CrewMemberName = c.CrewMember?.Name,
+                RoleType = c.RoleType,
+            }).ToList(),
+        };
+    }
+
+    public static IQueryable<FlightLogDto> ProjectList(this IQueryable<FlightLog> query)
+    {
+        return query.Select(f => new FlightLogDto
+        {
+            Id = f.Id,
+            FlightDate = f.FlightDate,
+            AircraftId = f.AircraftId,
+            AircraftRegistration = f.Aircraft!.Registration,
+            AircraftType = f.Aircraft.Type,
+            Remarks = f.Remarks,
+            TotalBlockMinutes = f.TotalBlockMinutes,
+            TotalFlightMinutes = f.TotalFlightMinutes,
+            TotalPicMinutes = f.TotalPicMinutes,
+            TotalSicMinutes = f.TotalSicMinutes,
+            TotalDualMinutes = f.TotalDualMinutes,
+            TotalNightMinutes = f.TotalNightMinutes,
+            TotalIfrMinutes = f.TotalIfrMinutes,
+            TotalLandings = f.TotalLandings,
+            Version = f.Version,
+            CreatedOn = f.CreatedOn,
+            Sectors = f.Sectors.OrderBy(s => s.SectorOrder).Select(s => new FlightSectorDto
+            {
+                Id = s.Id,
+                SectorOrder = s.SectorOrder,
+                DepartureAirportId = s.DepartureAirportId,
+                DepartureAirportDisplay = s.DepartureAirport!.ICAO,
+                ArrivalAirportId = s.ArrivalAirportId,
+                ArrivalAirportDisplay = s.ArrivalAirport!.ICAO,
+                BlockOff = s.BlockOff,
+                BlockOn = s.BlockOn,
+                BlockTimeMinutes = s.BlockTimeMinutes,
+                FlightTimeMinutes = s.FlightTimeMinutes,
+                PicTimeMinutes = s.PicTimeMinutes,
+                SicTimeMinutes = s.SicTimeMinutes,
+                DualTimeMinutes = s.DualTimeMinutes,
+                NightTimeMinutes = s.NightTimeMinutes,
+                IfrTimeMinutes = s.IfrTimeMinutes,
+                IsIfr = s.IsIfr,
+                IsNight = s.IsNight,
+            }).ToList(),
+            Crew = f.CrewAssignments.Select(c => new FlightLogCrewDto
+            {
+                CrewMemberId = c.CrewMemberId,
+                CrewMemberName = c.CrewMember!.Name,
+                RoleType = c.RoleType,
+            }).ToList(),
+        });
+    }
+}

@@ -1,0 +1,15 @@
+{
+  "solution": {
+    "path": "SkyLogg.slnx",
+    "projects": [
+      "src\\Client\\SkyLogg.Client.Core\\SkyLogg.Client.Core.csproj",
+      "src\\Client\\SkyLogg.Client.Web\\SkyLogg.Client.Web.csproj",
+      "src\\Server\\SkyLogg.Server.AppHost\\SkyLogg.Server.AppHost.csproj",
+      "src\\Server\\SkyLogg.Server.Api\\SkyLogg.Server.Api.csproj",
+      "src\\Server\\SkyLogg.Server.Shared\\SkyLogg.Server.Shared.csproj",
+      "src\\Server\\SkyLogg.Server.Web\\SkyLogg.Server.Web.csproj",
+      "src\\Shared\\SkyLogg.Shared.csproj",
+      "src\\Tests\\SkyLogg.Tests.csproj"
+    ]
+  }
+}

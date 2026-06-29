@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <RunSettingsFilePath>$(MSBuildProjectDirectory)\.runsettings</RunSettingsFilePath>
+        <TestingPlatformCommandLineArguments>--settings ./.runsettings</TestingPlatformCommandLineArguments>
+        <EnableMSTestRunner>true</EnableMSTestRunner>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.Testing" />
+        <PackageReference Include="Bit.BlazorES2019" />
+        <PackageReference Include="FakeItEasy" />
+        <PackageReference Include="Microsoft.Playwright.MSTest.v4" />
+        <PackageReference Include="MSTest" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Server\SkyLogg.Server.Web\SkyLogg.Server.Web.csproj" />
+        <ProjectReference Include="..\Server\SkyLogg.Server.Api\SkyLogg.Server.Api.csproj" />
+        <ProjectReference Include="..\Server\SkyLogg.Server.AppHost\SkyLogg.Server.AppHost.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="System.Net.Http.Headers" />
+        <Using Include="System.Net.Http.Json" />
+        <Using Include="SkyLogg.Shared" />
+        <Using Include="SkyLogg.Server.Web" />
+        <Using Include="SkyLogg.Tests.Infrastructure" />
+        <Using Include="Microsoft.AspNetCore.Http" />
+        <Using Include="Microsoft.AspNetCore.Components" />
+        <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+        <Using Include="Microsoft.Playwright" />
+        <Using Include="Microsoft.Playwright.MSTest" />
+        <Using Include="FakeItEasy" />
+    </ItemGroup>
+
+</Project>

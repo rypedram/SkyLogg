@@ -1,0 +1,95 @@
+@attribute [Route(PageUrls.Airports)]
+@attribute [Route("{culture?}" + PageUrls.Airports)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFleet)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.Airports)]"
+             PageTitle="@Localizer[nameof(AppStrings.AirportsPageTitle)]" />
+
+<section>
+    <BitStack Gap="1rem">
+        <EditForm Model="editingAirport" FormName="LogbookAirportForm" OnValidSubmit="WrapHandled(SaveAirport)">
+            <DataAnnotationsValidator />
+            <BitCard Style="padding:1rem" FullWidth>
+                <BitStack Gap="1rem">
+                    <BitText Typography="BitTypography.H6">
+                        @(editingAirport.Id == Guid.Empty ? Localizer[nameof(AppStrings.AddAirport)] : Localizer[nameof(AppStrings.UpdateAirport)])
+                    </BitText>
+                    <BitStack Horizontal Wrap Gap="1rem">
+                        <BitTextField @bind-Value="editingAirport.ICAO" Label="@Localizer[nameof(AppStrings.ICAO)]" />
+                        <BitTextField @bind-Value="editingAirport.IATA" Label="@Localizer[nameof(AppStrings.IATA)]" />
+                        <BitTextField @bind-Value="editingAirport.Name" Label="@Localizer[nameof(AppStrings.Name)]" />
+                    </BitStack>
+                    <BitStack Horizontal Wrap Gap="1rem">
+                        <BitTextField @bind-Value="editingAirport.City" Label="@Localizer[nameof(AppStrings.City)]" />
+                        <BitDropdown Items="countryItems"
+                                     Label="@Localizer[nameof(AppStrings.Country)]"
+                                     Placeholder="@Localizer[nameof(AppStrings.SelectCountry)]"
+                                     Value="@selectedCountryValue"
+                                     OnChange="WrapHandled((string? v) => OnCountryChanged(v))" />
+                    </BitStack>
+                    <BitStack Horizontal Wrap Gap="1rem">
+                        <BitNumberField @bind-Value="editingAirport.Latitude" Label="@Localizer[nameof(AppStrings.Latitude)]" />
+                        <BitNumberField @bind-Value="editingAirport.Longitude" Label="@Localizer[nameof(AppStrings.Longitude)]" />
+                        <BitNumberField @bind-Value="editingAirport.ElevationFt" Label="@Localizer[nameof(AppStrings.ElevationFt)]" />
+                        <BitCheckbox @bind-Value="editingAirport.IsActive" Label="@Localizer[nameof(AppStrings.Active)]" />
+                    </BitStack>
+                    <BitStack Horizontal Gap="0.5rem">
+                        <BitButton ButtonType="BitButtonType.Submit" Color="BitColor.Primary" IsLoading="isSaving">
+                            @(editingAirport.Id == Guid.Empty ? Localizer[nameof(AppStrings.Add)] : Localizer[nameof(AppStrings.Update)])
+                        </BitButton>
+                        <BitButton Variant="BitVariant.Outline" OnClick="WrapHandled(ResetForm)">
+                            @Localizer[nameof(AppStrings.Cancel)]
+                        </BitButton>
+                    </BitStack>
+                </BitStack>
+            </BitCard>
+        </EditForm>
+
+        <BitSearchBox @bind-Value="searchText"
+                      Placeholder="@Localizer[nameof(AppStrings.SearchAirportsPlaceholder)]"
+                      OnChange="WrapHandled(SearchAirports)"
+                      Immediate DebounceTime="300" />
+
+        @if (isLoading)
+        {
+            <BitRippleLoading />
+        }
+        else if (airports.Count == 0)
+        {
+            <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoAirports)]</BitMessage>
+        }
+        else
+        {
+            @foreach (var airport in airports)
+            {
+                <BitCard Style="padding:1rem" FullWidth>
+                    <BitStack Horizontal Wrap HorizontalAlign="BitAlignment.SpaceBetween" Gap="1rem">
+                        <BitStack Gap="0.25rem">
+                            <BitText Typography="BitTypography.Subtitle1">@airport.DisplayName</BitText>
+                            <BitText Typography="BitTypography.Body2">
+                                @airport.City, @airport.Country —
+                                @Localizer[nameof(AppStrings.Latitude)]: @airport.Latitude,
+                                @Localizer[nameof(AppStrings.Longitude)]: @airport.Longitude
+                            </BitText>
+                        </BitStack>
+                        <BitStack Horizontal Gap="0.5rem">
+                            <BitButton IconName="@BitIconName.Edit"
+                                       Variant="BitVariant.Outline"
+                                       OnClick="WrapHandled(() => EditAirport(airport))">
+                                @Localizer[nameof(AppStrings.Edit)]
+                            </BitButton>
+                            <BitButton IconName="@BitIconName.Delete"
+                                       Color="BitColor.Error"
+                                       Variant="BitVariant.Outline"
+                                       OnClick="WrapHandled(() => DeactivateAirport(airport))">
+                                @Localizer[nameof(AppStrings.Delete)]
+                            </BitButton>
+                        </BitStack>
+                    </BitStack>
+                </BitCard>
+            }
+        }
+    </BitStack>
+</section>

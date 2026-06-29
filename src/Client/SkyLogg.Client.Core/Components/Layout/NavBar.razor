@@ -1,0 +1,24 @@
+@inherits AppComponentBase;
+
+<section>
+    <BitNavBar TItem="BitNavBarOption" Style="width:100%">
+
+        <BitNavBarOption Text="@Localizer[nameof(AppStrings.Home)]" IconName="@BitIconName.Home" Url="@PageUrls.Home" />
+
+        <AuthorizeView Policy="@AppFeatures.Logbook.ManageFlightLogs">
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Logbook)]" IconName="@BitIconName.Airplane" Url="@PageUrls.Logbook" />
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Flights)]" IconName="@BitIconName.BookAnswers" Url="@PageUrls.FlightLogs" />
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.FlightMap)]" IconName="@BitIconName.MapPin" Url="@PageUrls.FlightMap" />
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.FlightImport)]" IconName="@BitIconName.Upload" Url="@PageUrls.FlightImport" />
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Reports)]" IconName="@BitIconName.ReportDocument" Url="@PageUrls.FlightReports" />
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Summary)]" IconName="@BitIconName.BarChartVerticalFill" Url="@PageUrls.FlightSummary" />
+        </AuthorizeView>
+        <AuthorizeView Policy="@AppFeatures.Logbook.ManageFleet">
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Aircrafts)]" IconName="@BitIconName.Airplane" Url="@PageUrls.AircraftList" />
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Airports)]" IconName="@BitIconName.Globe" Url="@PageUrls.Airports" />
+        </AuthorizeView>
+
+        <BitNavBarOption Text="@Localizer[nameof(AppStrings.Terms)]" IconName="@BitIconName.EntityExtraction" Url="@PageUrls.Terms" />
+
+    </BitNavBar>
+</section>

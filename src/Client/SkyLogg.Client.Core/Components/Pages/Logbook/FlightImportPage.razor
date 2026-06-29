@@ -1,0 +1,57 @@
+@attribute [Route(PageUrls.FlightImport)]
+@attribute [Route("{culture?}" + PageUrls.FlightImport)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFlightLogs)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.FlightImport)]"
+             PageTitle="@Localizer[nameof(AppStrings.FlightImportPageTitle)]" />
+
+<section>
+    <BitStack Gap="1rem">
+        <BitCard Style="padding:1rem" FullWidth>
+            <BitStack Gap="1rem">
+                <BitText Typography="BitTypography.Body2">
+                    Camera, image, PDF, CSV, and Excel providers plug into the same OCR/AI import contract. The current provider accepts OCR/raw text where each line follows:
+                    date, aircraft, departure, arrival, block off, takeoff, landing, block on, remarks.
+                </BitText>
+                <BitTextField @bind-Value="rawText"
+                              Multiline
+                              Rows="8"
+                              Label="@Localizer[nameof(AppStrings.RawImportText)]" />
+                <BitButton Color="BitColor.Primary"
+                           IconName="@BitIconName.Preview"
+                           IsLoading="isPreviewing"
+                           OnClick="WrapHandled(PreviewImport)">
+                    @Localizer[nameof(AppStrings.PreviewImport)]
+                </BitButton>
+            </BitStack>
+        </BitCard>
+
+        @if (preview is not null)
+        {
+            <BitCard Style="padding:1rem" FullWidth>
+                <BitStack Gap="1rem">
+                    <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.ImportCandidates)]</BitText>
+                    @foreach (var candidate in preview.Candidates)
+                    {
+                        <BitCard Style="padding:1rem" FullWidth>
+                            <BitStack Gap="0.25rem">
+                                <BitText>@candidate.FlightDate?.ToString("d") — @candidate.AircraftRegistration</BitText>
+                                <BitText>@candidate.DepartureAirportCode → @candidate.ArrivalAirportCode</BitText>
+                                <BitText Typography="BitTypography.Body2">
+                                    @candidate.BlockOff / @candidate.Takeoff / @candidate.Landing / @candidate.BlockOn —
+                                    @Localizer[nameof(AppStrings.Confidence)]: @candidate.Confidence.ToString("P0")
+                                </BitText>
+                                @if (string.IsNullOrWhiteSpace(candidate.Remarks) is false)
+                                {
+                                    <BitText Typography="BitTypography.Body2">@candidate.Remarks</BitText>
+                                }
+                            </BitStack>
+                        </BitCard>
+                    }
+                </BitStack>
+            </BitCard>
+        }
+    </BitStack>
+</section>

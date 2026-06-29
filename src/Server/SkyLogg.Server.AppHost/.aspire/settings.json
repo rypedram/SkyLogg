@@ -1,0 +1,7 @@
+{
+    "appHostPath": "../SkyLogg.Server.AppHost.csproj",
+    "features": {
+        "deployCommandEnabled": "true",
+        "execCommandEnabled": "true"
+    }
+}

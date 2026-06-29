@@ -1,0 +1,27 @@
+@attribute [Route(PageUrls.CrewMembers)]
+@attribute [Route("{culture?}" + PageUrls.CrewMembers)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageCrew)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.CrewMembers)]"
+             PageTitle="@Localizer[nameof(AppStrings.CrewMembersPageTitle)]" />
+
+<section>
+    <BitStack Gap="1rem">
+        <BitStack Horizontal Gap="1rem">
+            <BitTextField @bind-Value="newCrewName" Placeholder="@Localizer[nameof(AppStrings.CrewName)]" />
+            <BitButton IconName="@BitIconName.Add" OnClick="WrapHandled(AddCrew)" Color="BitColor.Primary">@Localizer[nameof(AppStrings.Add)]</BitButton>
+        </BitStack>
+
+        @foreach (var crew in crewMembers)
+        {
+            <BitCard Style="padding:1rem" FullWidth>
+                <BitStack Horizontal HorizontalAlign="BitAlignment.SpaceBetween">
+                    <BitText>@crew.Name</BitText>
+                    <BitButton IconOnly IconName="@BitIconName.Delete" OnClick="WrapHandled(() => DeleteCrew(crew))" />
+                </BitStack>
+            </BitCard>
+        }
+    </BitStack>
+</section>

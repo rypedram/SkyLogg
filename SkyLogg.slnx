@@ -1,0 +1,33 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="DebugBlazorServer" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Folder Name="/.SolutionItems/" />
+  <Folder Name="/.SolutionItems/.docs/" />
+  <Folder Name="/.SolutionItems/.github/" />
+  <Folder Name="/.SolutionItems/.github/agents/" />
+  <Folder Name="/.SolutionItems/.github/prompts/" />
+  <Folder Name="/.SolutionItems/.github/workflows/" />
+  <Folder Name="/Client/">
+    <Project Path="src/Client/SkyLogg.Client.Core/SkyLogg.Client.Core.csproj" />
+    <Project Path="src/Client/SkyLogg.Client.Maui/SkyLogg.Client.Maui.csproj">
+      <Deploy />
+    </Project>
+    <Project Path="src/Client/SkyLogg.Client.Web/SkyLogg.Client.Web.csproj" />
+    <Project Path="src/Client/SkyLogg.Client.Windows/SkyLogg.Client.Windows.csproj" />
+  </Folder>
+  <Folder Name="/Server/">
+    <Project Path="src/Server/SkyLogg.Server.Api/SkyLogg.Server.Api.csproj" />
+    <Project Path="src/Server/SkyLogg.Server.AppHost/SkyLogg.Server.AppHost.csproj" />
+    <Project Path="src/Server/SkyLogg.Server.Shared/SkyLogg.Server.Shared.csproj" />
+    <Project Path="src/Server/SkyLogg.Server.Web/SkyLogg.Server.Web.csproj" />
+  </Folder>
+  <Folder Name="/Shared/">
+    <Project Path="src/Shared/SkyLogg.Shared.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="src/Tests/SkyLogg.Tests.csproj" />
+  </Folder>
+</Solution>

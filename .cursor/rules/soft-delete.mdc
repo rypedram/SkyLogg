@@ -1,0 +1,48 @@
+---
+description: Soft-delete (IsArchived) conventions for server entities, EF Core configuration, filtered unique indexes, and DB-error translation
+globs: src/Server/FleetMgmt.Server.Data/**/*.cs,src/Server/FleetMgmt.Server.Model/**/*.cs,src/Server/FleetMgmt.Server.Service/**/*.cs
+alwaysApply: false
+---
+
+# Soft-Delete (IsArchived) Conventions
+
+This project never hard-deletes domain data. Every soft-deletable entity inherits `BaseEntity`
+(`src/Server/FleetMgmt.Server.Model/BaseEntity.cs`), which carries `IsArchived`.
+
+## Core rules
+
+- **"Delete" means archive.** `EntityRepository<TEntity>.Delete` sets `IsArchived = true` and updates the row. Never call `Set.Remove` for `BaseEntity` types.
+- **Archived rows are hidden automatically.** `AppDbContext` applies a global query filter `HasQueryFilter(e => !e.IsArchived)` to every `BaseEntity`. To read archived rows use `EntityRepository.AllQuery` or `.IgnoreQueryFilters()` (e.g. seeding/admin), and remember `.IgnoreQueryFilters()` disables *all* filters.
+- **Uniqueness is per non-archived row.** So a code/name can be reused once the old record is archived.
+
+## Filtered unique indexes — do NOT hand-write the IsArchived filter
+
+`AppDbContext.ConfigureArchivedEntityUniqueIndexes` runs after all configurations and automatically
+adds `[IsArchived] = 0` (plus `[Col] IS NOT NULL` for nullable indexed columns) to every **unique**
+index on a `BaseEntity` type.
+
+```csharp
+// ✅ GOOD — just declare the unique index; the [IsArchived] = 0 filter is added centrally
+builder.HasIndex(c => c.CountryCode).IsUnique();
+
+// ❌ BAD — never add a manual IsArchived filter; it duplicates/conflicts with the central logic
+builder.HasIndex(c => c.CountryCode).IsUnique().HasFilter("[IsArchived] = 0");
+```
+
+`HasFilter` is only for non-`BaseEntity` types (e.g. `User.Email IS NOT NULL`).
+
+## DB errors from the filter must surface as a business exception
+
+A duplicate write against an `[IsArchived] = 0` filtered unique index must reach the user as the
+localized `SoftDeleteConflictException`, never a raw `DbUpdateException`.
+
+- This is handled centrally in `AppDbContext.SaveChanges`/`SaveChangesAsync` via `SoftDeleteConflictTranslator.TryTranslate`. Do not catch `DbUpdateException` ad-hoc in services to reformat these.
+- Messages live in `AppStrings` (`SoftDeleteUniqueConflictException`, `SoftDeleteUniqueConflictWithValueException`) with `en` + `fa` values, and are formatted in `ServerExceptionHandler`. Keep user-facing text clear and free of SQL/index/column names.
+- Prefer validating duplicates in the service first (throw `ResourceValidationException`/`ConflictException` with a field-specific message) for the best UX; the translator is the safety net for the rest.
+
+## When you add a new unique index on a soft-deletable entity
+
+1. Declare `.IsUnique()` only (no manual IsArchived filter).
+2. Add an EF Core migration and confirm the generated `CreateIndex` includes `filter: "[IsArchived] = 0..."`.
+3. Verify the model snapshot has the matching `.HasFilter("[IsArchived] = 0...")`.
+4. If the entity is *not* a `BaseEntity`, the filter will not be added automatically — reconsider whether it should be soft-deletable.

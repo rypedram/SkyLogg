@@ -1,0 +1,26 @@
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.3.4">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <IsAspireHost>true</IsAspireHost>
+        <EntryPointAccessibility>public</EntryPointAccessibility>
+        <UserSecretsId>4FAFBA33-FA47-4BC6-A065-C2E88EFD6C11</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.DevTunnels" />
+        <PackageReference Include="Aspire.Hosting.Keycloak" />
+        <PackageReference Include="Aspire.Hosting.Maui" />
+        <PackageReference Include="CommunityToolkit.Aspire.Hosting.MailPit" />
+        <PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Client\SkyLogg.Client.Web\SkyLogg.Client.Web.csproj" />
+        <ProjectReference Include="..\..\Client\SkyLogg.Client.Windows\SkyLogg.Client.Windows.csproj" />
+        <ProjectReference Include="..\SkyLogg.Server.Web\SkyLogg.Server.Web.csproj" />
+        <ProjectReference Include="..\SkyLogg.Server.Shared\SkyLogg.Server.Shared.csproj" IsAspireProjectResource="false" />
+    </ItemGroup>
+
+</Project>

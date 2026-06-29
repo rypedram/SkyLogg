@@ -1,0 +1,82 @@
+@attribute [Route(PageUrls.FlightMap)]
+@attribute [Route("{culture?}" + PageUrls.FlightMap)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFlightLogs)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.FlightMap)]"
+             PageTitle="@Localizer[nameof(AppStrings.FlightMapPageTitle)]" />
+
+<section>
+    <BitStack Gap="1rem">
+        <BitCard Style="padding:1rem" FullWidth>
+            <BitStack Horizontal Wrap Gap="1rem">
+                <BitNumberField @bind-Value="yearFilter" Label="@Localizer[nameof(AppStrings.Year)]" />
+                <BitNumberField @bind-Value="monthFilter" Label="@Localizer[nameof(AppStrings.Month)]" />
+                <BitDropdown Items="aircraftItems"
+                             Label="@Localizer[nameof(AppStrings.Aircraft)]"
+                             Value="@aircraftFilterValue"
+                             OnChange="WrapHandled((string? v) => OnAircraftFilterChanged(v))" />
+                <BitButton IconName="@BitIconName.Refresh" OnClick="WrapHandled(LoadMap)">
+                    @Localizer[nameof(AppStrings.Apply)]
+                </BitButton>
+            </BitStack>
+        </BitCard>
+
+        @if (isLoading)
+        {
+            <BitRippleLoading />
+        }
+        else if (mapData is not null)
+        {
+            <BitCard Style="padding:1rem" FullWidth>
+                <BitStack Gap="1rem">
+                    <BitStack Horizontal Wrap Gap="1rem">
+                        <BitText>@Localizer[nameof(AppStrings.MapProvider)]: @mapData.ProviderKey</BitText>
+                        <BitText>@Localizer[nameof(AppStrings.TotalFlights)]: @mapData.FlightCount</BitText>
+                        <BitText>@Localizer[nameof(AppStrings.TotalFlightHours)]: <FlightTimeDisplay Minutes="mapData.TotalFlightMinutes" /></BitText>
+                    </BitStack>
+
+                    @* No Bit.BlazorUI map component exists; this SVG is the pluggable provider's lightweight renderer. *@
+                    <svg viewBox="0 0 360 180" style="width:100%;height:18rem;border-radius:1rem;border:1px solid currentColor">
+                        @foreach (var route in mapData.Routes)
+                        {
+                            <polyline points="@GetPolylinePoints(route)"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      stroke-width="1.2"
+                                      opacity="0.65" />
+                        }
+                        @foreach (var airport in mapData.Airports)
+                        {
+                            <circle cx="@ProjectX(airport.Longitude)"
+                                    cy="@ProjectY(airport.Latitude)"
+                                    r="@AirportRadius(airport.VisitCount)"
+                                    fill="currentColor"
+                                    opacity="0.85">
+                                <title>@airport.ICAO — @airport.VisitCount</title>
+                            </circle>
+                        }
+                    </svg>
+                </BitStack>
+            </BitCard>
+
+            <BitStack Horizontal Wrap Gap="1rem">
+                <BitCard Style="padding:1rem" FullWidth>
+                    <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.Routes)]</BitText>
+                    @foreach (var route in mapData.Routes.Take(20))
+                    {
+                        <BitText>@route.FlightDate.ToString("d") — @route.AircraftRegistration — @route.DepartureAirport → @route.ArrivalAirport</BitText>
+                    }
+                </BitCard>
+                <BitCard Style="padding:1rem" FullWidth>
+                    <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.VisitedCountries)]</BitText>
+                    @foreach (var country in mapData.CountryStats.Take(10))
+                    {
+                        <BitText>@country.Country — @country.VisitCount</BitText>
+                    }
+                </BitCard>
+            </BitStack>
+        }
+    </BitStack>
+</section>

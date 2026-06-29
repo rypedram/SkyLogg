@@ -1,0 +1,50 @@
+@attribute [Route(PageUrls.FlightLogs)]
+@attribute [Route("{culture?}" + PageUrls.FlightLogs)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFlightLogs)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.FlightLogs)]"
+             PageTitle="@Localizer[nameof(AppStrings.FlightLogsPageTitle)]" />
+
+<section>
+    <BitStack Gap="1rem">
+        <BitStack Horizontal Wrap Gap="1rem">
+            <BitSearchBox @bind-Value="searchText"
+                          Placeholder="@Localizer[nameof(AppStrings.SearchFlightsPlaceholder)]"
+                          OnChange="WrapHandled(FilterFlights)"
+                          Immediate DebounceTime="300" />
+            <BitDatePicker @bind-Value="filterFromDate" Placeholder="@Localizer[nameof(AppStrings.FromDate)]" OnChange="WrapHandled(FilterFlights)" />
+            <BitDatePicker @bind-Value="filterToDate" Placeholder="@Localizer[nameof(AppStrings.ToDate)]" OnChange="WrapHandled(FilterFlights)" />
+            <BitButton IconName="@BitIconName.Add" Color="BitColor.Primary" Href="@PageUrls.AddOrEditFlightLog">
+                @Localizer[nameof(AppStrings.AddFlight)]
+            </BitButton>
+        </BitStack>
+
+        @if (isLoading)
+        {
+            <BitRippleLoading />
+        }
+        else if (filteredFlights.Count == 0)
+        {
+            <BitMessage Color="BitColor.Info">@Localizer[nameof(AppStrings.NoFlights)]</BitMessage>
+        }
+        else
+        {
+            @foreach (var flight in filteredFlights)
+            {
+                <BitCard FullWidth Style="padding:1rem">
+                    <BitLink Href="@($"{PageUrls.FlightLogDetail}/{flight.Id}")" NoUnderline>
+                        <BitStack Horizontal HorizontalAlign="BitAlignment.SpaceBetween">
+                            <BitStack>
+                                <BitText>@flight.FlightDate.ToString("d") — @flight.AircraftRegistration</BitText>
+                                <BitText Typography="BitTypography.Body2">@flight.RouteSummary</BitText>
+                            </BitStack>
+                            <FlightTimeDisplay Minutes="flight.TotalBlockMinutes" />
+                        </BitStack>
+                    </BitLink>
+                </BitCard>
+            }
+        }
+    </BitStack>
+</section>

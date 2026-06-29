@@ -1,0 +1,87 @@
+---
+description: Prefer bit BlazorUI (Bit.BlazorUI) components for all UI work and look up their docs by component name
+globs: **/*.razor,**/*.razor.cs,**/*.razor.scss,**/*.razor.css
+alwaysApply: false
+---
+
+# bit BlazorUI Usage
+
+This project uses **bit BlazorUI** (`Bit.BlazorUI`, already imported globally in `_Imports.razor`). When building or editing any Blazor UI, prefer bit BlazorUI components over raw HTML, hand-rolled controls, or other component libraries.
+
+## Core Principles
+
+1. **Reach for a `Bit*` component first.** Before writing raw `<input>`, `<button>`, `<table>`, `<dialog>`, etc., check whether a bit BlazorUI component already covers the need (e.g. `BitTextField`, `BitButton`, `BitDataGrid`, `BitModal`, `BitDatePicker`, `BitDropdown`, `BitNav`, `BitMessage`, `BitProgress`, `BitCard`, `BitStack`, `BitInfiniteScrolling`, etc.).
+2. **Compose, do not reinvent.** If a layout primitive exists (`BitStack`, `BitGrid`, `BitOverflow`), use it instead of bespoke flex/grid CSS.
+3. **Use the typed enums/parameters** the library exposes (`BitColor`, `BitSize`, `BitVariant`, `BitIconPosition`, `BitButtonType`, `BitLinkRels`, `BitDir`, `BitVisibility`, …) rather than passing magic strings, inline styles, or custom CSS classes.
+4. **Theming and tokens:** rely on the library's theming/tokens (via `Color`, `Size`, `Variant`, `Styles`, `Classes`) before introducing project-specific CSS.
+5. **Accessibility:** prefer the built-in `AriaLabel`, `AriaDescription`, `AriaHidden`, `Title`, `Dir`, `TabIndex` parameters from `BitComponentBase` over manual `aria-*` attributes on wrapper elements.
+6. **Forms:** combine bit BlazorUI inputs with `EditForm` / `DataAnnotationsValidator`. Use `ButtonType="BitButtonType.Submit"` on submit buttons and let `EditContext` cascade.
+7. **Icons:** prefer `IconName` (Fluent icons) or `BitIconInfo` for external icon libraries (FontAwesome, Bootstrap Icons) instead of inline `<i>` / `<svg>` markup.
+8. **Loading state:** prefer the built-in `IsLoading` / `LoadingTemplate` parameters on buttons and data components instead of hand-rolled spinners.
+
+## Looking Up Component Docs
+
+Every bit BlazorUI component has a documentation page at:
+
+```
+https://blazorui.bitplatform.dev/components/<component_name>
+```
+
+`<component_name>` is the component name **without the `Bit` prefix, lowercased, no separators**.
+
+| Component               | Docs URL                                                  |
+| ----------------------- | --------------------------------------------------------- |
+| `BitActionButton`       | `https://blazorui.bitplatform.dev/components/actionbutton`       |
+| `BitButton`             | `https://blazorui.bitplatform.dev/components/button`             |
+| `BitInfiniteScrolling`  | `https://blazorui.bitplatform.dev/components/infinitescrolling`  |
+| `BitTextField`          | `https://blazorui.bitplatform.dev/components/textfield`          |
+| `BitDatePicker`         | `https://blazorui.bitplatform.dev/components/datepicker`         |
+| `BitDataGrid`           | `https://blazorui.bitplatform.dev/components/datagrid`           |
+| `BitModal`              | `https://blazorui.bitplatform.dev/components/modal`              |
+
+**When you are unsure of a component's parameters, defaults, enums, or sub-styles, fetch its docs page** (read it with the web-fetch tool, or ask the user to share it) before guessing an API. Do not invent parameter names.
+
+## When To Deviate
+
+- The required behavior genuinely has no bit BlazorUI counterpart.
+- An existing project-specific wrapper (e.g. `DsButton`, `DsCard`, `DsTextField` under `Components/Common/`) already standardizes the use case — extend or reuse that wrapper instead of bypassing it.
+
+If you deviate, leave a short comment explaining why no `Bit*` component fits.
+
+## Examples
+
+```razor
+<!-- BAD: raw HTML, manual classes, no a11y, no theming -->
+<button class="my-btn" onclick="@Save" disabled="@IsSaving">
+  <i class="fa fa-save"></i> Save
+</button>
+
+<!-- GOOD: bit BlazorUI, typed params, built-in loading + icon + a11y -->
+<BitButton OnClick="Save"
+           IsLoading="IsSaving"
+           IconName="@BitIconName.Save"
+           Color="BitColor.Primary"
+           Size="BitSize.Medium"
+           ButtonType="BitButtonType.Submit"
+           AriaLabel="Save changes">
+    Save
+</BitButton>
+```
+
+```razor
+<!-- BAD: hand-rolled infinite scroll with scroll-event JS -->
+<div @onscroll="OnScroll">@foreach (var i in items) { <Row Item="i" /> }</div>
+
+<!-- GOOD: BitInfiniteScrolling with an ItemsProvider -->
+<BitInfiniteScrolling TItem="Entry" ItemsProvider="LoadPageAsync">
+    <ItemTemplate Context="entry">
+        <Row Item="entry" />
+    </ItemTemplate>
+    <LoadingTemplate>
+        <BitProgress Indeterminate="true" />
+    </LoadingTemplate>
+    <EmptyTemplate>
+        <BitMessage Color="BitColor.Info">No entries</BitMessage>
+    </EmptyTemplate>
+</BitInfiniteScrolling>
+```

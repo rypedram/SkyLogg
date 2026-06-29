@@ -1,0 +1,14 @@
+@inherits AppComponentBase
+
+<section>
+    <BitStack>
+        <BitStack Horizontal Wrap>
+            <OverallStatusCard Loading="isLoading" Value="dto.TotalFlightLogs" Label="@Localizer[nameof(AppStrings.TotalFlights)]" IconName="@BitIconName.Airplane" />
+            <OverallStatusCard Loading="isLoading" Value="dto.TotalAircraft" Label="@Localizer[nameof(AppStrings.TotalAircraft)]" IconName="@BitIconName.TrainSolid" />
+        </BitStack>
+        <BitStack Horizontal Wrap>
+            <OverallStatusCard Loading="isLoading" Value="dto.Last30DaysFlightCount" Label="@Localizer[nameof(AppStrings.Last30DaysFlights)]" IconName="@BitIconName.Calendar" />
+            <OverallStatusCard Loading="isLoading" Value="dto.TotalBlockMinutes" Label="@Localizer[nameof(AppStrings.TotalBlockMinutes)]" IconName="@BitIconName.Clock" />
+        </BitStack>
+    </BitStack>
+</section>

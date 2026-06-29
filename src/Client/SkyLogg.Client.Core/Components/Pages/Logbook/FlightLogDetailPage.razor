@@ -1,0 +1,76 @@
+@attribute [Route(PageUrls.FlightLogDetail + "/{Id:guid}")]
+@attribute [Route("{culture?}" + PageUrls.FlightLogDetail + "/{Id:guid}")]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFlightLogs)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.FlightDetail)]"
+             PageTitle="@Localizer[nameof(AppStrings.FlightDetailPageTitle)]" />
+
+<section>
+    @if (isLoading)
+    {
+        <BitRippleLoading />
+    }
+    else if (flight is not null)
+    {
+        <BitStack Gap="1.5rem">
+            <BitStack Horizontal HorizontalAlign="BitAlignment.SpaceBetween">
+                <BitText Typography="BitTypography.H5">@flight.FlightDate.ToString("d") — @flight.AircraftRegistration</BitText>
+                <BitStack Horizontal Gap="0.5rem">
+                    <BitButton Href="@($"{PageUrls.AddOrEditFlightLog}/{flight.Id}")" IconName="@BitIconName.Edit">@Localizer[nameof(AppStrings.Edit)]</BitButton>
+                    <BitButton Color="BitColor.Error" IconName="@BitIconName.Delete" OnClick="WrapHandled(ConfirmDelete)">@Localizer[nameof(AppStrings.Delete)]</BitButton>
+                </BitStack>
+            </BitStack>
+
+            <BitCard Style="padding:1rem">
+                <BitStack Gap="0.5rem">
+                    <BitText>@Localizer[nameof(AppStrings.Totals)]: @flight.TotalBlockTimeDisplay / @flight.TotalFlightTimeDisplay / PIC @flight.TotalPicTimeDisplay</BitText>
+                    <BitStack Horizontal Wrap Gap="1rem">
+                        <BitText>@Localizer[nameof(AppStrings.Sic)]: @flight.TotalSicTimeDisplay</BitText>
+                        <BitText>@Localizer[nameof(AppStrings.Dual)]: @flight.TotalDualTimeDisplay</BitText>
+                        <BitText>@Localizer[nameof(AppStrings.Night)]: @flight.TotalNightTimeDisplay</BitText>
+                        <BitText>@Localizer[nameof(AppStrings.Ifr)]: @flight.TotalIfrTimeDisplay</BitText>
+                        <BitText>@Localizer[nameof(AppStrings.Landings)]: @flight.TotalLandings</BitText>
+                    </BitStack>
+                    @if (string.IsNullOrWhiteSpace(flight.Remarks) is false)
+                    {
+                        <BitText>@Localizer[nameof(AppStrings.Remarks)]: @flight.Remarks</BitText>
+                    }
+                </BitStack>
+            </BitCard>
+
+            @foreach (var sector in flight.Sectors.OrderBy(s => s.SectorOrder))
+            {
+                <BitCard Style="padding:1rem" FullWidth>
+                    <BitText Typography="BitTypography.Subtitle1">@Localizer[nameof(AppStrings.Sector)] @sector.SectorOrder</BitText>
+                    <BitText>@sector.DepartureAirportDisplay → @sector.ArrivalAirportDisplay</BitText>
+                    <BitText Typography="BitTypography.Body2">
+                        @sector.BlockOff.ToString("u") — @sector.BlockOn.ToString("u") |
+                        @Localizer[nameof(AppStrings.BlockTime)]: @sector.BlockTimeDisplay |
+                        @Localizer[nameof(AppStrings.FlightTime)]: @sector.FlightTimeDisplay
+                    </BitText>
+                    <BitText Typography="BitTypography.Body2">
+                        PIC @sector.PicTimeDisplay |
+                        SIC @sector.SicTimeDisplay |
+                        @Localizer[nameof(AppStrings.Dual)]: @sector.DualTimeDisplay |
+                        @Localizer[nameof(AppStrings.Night)]: @sector.NightTimeDisplay |
+                        @Localizer[nameof(AppStrings.Ifr)]: @sector.IfrTimeDisplay
+                    </BitText>
+                </BitCard>
+            }
+
+            <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.Crew)]</BitText>
+            @foreach (var crew in flight.Crew)
+            {
+                <BitText>@crew.CrewMemberName — @crew.RoleType</BitText>
+            }
+        </BitStack>
+
+        <BitDialog @bind-IsOpen="isDeleteDialogOpen"
+                   Title="@Localizer[nameof(AppStrings.DeleteFlight)]"
+                   OnOk="WrapHandled(DeleteFlight)">
+            <BitText>@Localizer[nameof(AppStrings.AreYouSureDeleteFlight)]</BitText>
+        </BitDialog>
+    }
+</section>

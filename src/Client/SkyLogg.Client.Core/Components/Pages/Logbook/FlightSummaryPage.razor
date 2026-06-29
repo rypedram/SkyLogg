@@ -1,0 +1,47 @@
+@attribute [Route(PageUrls.FlightSummary)]
+@attribute [Route("{culture?}" + PageUrls.FlightSummary)]
+@attribute [Authorize(Policy = AuthPolicies.PRIVILEGED_ACCESS)]
+@attribute [Authorize(Policy = AppFeatures.Logbook.ManageFlightLogs)]
+@inherits AppPageBase
+
+<AppPageData Title="@Localizer[nameof(AppStrings.FlightSummary)]"
+             PageTitle="@Localizer[nameof(AppStrings.FlightSummaryPageTitle)]" />
+
+<section>
+    <BitStack Gap="1.5rem">
+        <BitStack Horizontal Wrap Gap="1rem">
+            <BitDatePicker @bind-Value="fromDate" Label="@Localizer[nameof(AppStrings.FromDate)]" />
+            <BitDatePicker @bind-Value="toDate" Label="@Localizer[nameof(AppStrings.ToDate)]" />
+            <BitButton OnClick="WrapHandled(LoadSummary)" IconName="@BitIconName.Refresh">@Localizer[nameof(AppStrings.Apply)]</BitButton>
+            <BitButton OnClick="WrapHandled(ExportCsv)" IconName="@BitIconName.ExcelDocument">CSV</BitButton>
+            <BitButton OnClick="WrapHandled(ExportPdf)" IconName="@BitIconName.PDF">PDF</BitButton>
+        </BitStack>
+
+        @if (isLoading)
+        {
+            <BitRippleLoading />
+        }
+        else if (summary is not null)
+        {
+            <BitStack Horizontal Wrap Gap="1rem">
+                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.TotalBlockHours)]</BitText><FlightTimeDisplay Minutes="summary.TotalBlockMinutes" /></BitCard>
+                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.TotalFlightHours)]</BitText><FlightTimeDisplay Minutes="summary.TotalFlightMinutes" /></BitCard>
+                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Night)]</BitText><FlightTimeDisplay Minutes="summary.TotalNightMinutes" /></BitCard>
+                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.Ifr)]</BitText><FlightTimeDisplay Minutes="summary.TotalIfrMinutes" /></BitCard>
+                <BitCard Style="padding:1rem"><BitText>@Localizer[nameof(AppStrings.FlightCount)]</BitText><BitText>@summary.FlightCount</BitText></BitCard>
+            </BitStack>
+
+            <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.AircraftUsage)]</BitText>
+            @foreach (var item in summary.AircraftUsage)
+            {
+                <BitText>@item.Registration — <FlightTimeDisplay Minutes="item.BlockMinutes" /> (@item.FlightCount)</BitText>
+            }
+
+            <BitText Typography="BitTypography.H6">@Localizer[nameof(AppStrings.TopAirports)]</BitText>
+            @foreach (var airport in summary.TopAirports)
+            {
+                <BitText>@airport.ICAO — @airport.Name (@airport.VisitCount)</BitText>
+            }
+        }
+    </BitStack>
+</section>
