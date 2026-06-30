@@ -5,11 +5,29 @@
     <BuildType Name="Release" />
   </Configurations>
   <Folder Name="/.SolutionItems/" />
-  <Folder Name="/.SolutionItems/.docs/" />
+  <Folder Name="/.SolutionItems/.docs/">
+    <File Path="01-Vision.md" />
+    <File Path="02-Requirements.md" />
+    <File Path="03-Architecture.md" />
+    <File Path="04-Domain.md" />
+    <File Path="05-Database.md" />
+    <File Path="06-UI-UX.md" />
+    <File Path="07-ImportEngine.md" />
+    <File Path="08-Map.md" />
+    <File Path="09-AI.md" />
+    <File Path="10-Roadmap.md" />
+    <File Path="11-CodingStandards.md" />
+    <File Path="12-API.md" />
+  </Folder>
   <Folder Name="/.SolutionItems/.github/" />
   <Folder Name="/.SolutionItems/.github/agents/" />
   <Folder Name="/.SolutionItems/.github/prompts/" />
   <Folder Name="/.SolutionItems/.github/workflows/" />
+  <Folder Name="/Core/">
+    <Project Path="src/Core/SkyLogg.Domain/SkyLogg.Domain.csproj" />
+    <Project Path="src/Core/SkyLogg.Application/SkyLogg.Application.csproj" />
+    <Project Path="src/Core/SkyLogg.Infrastructure/SkyLogg.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/Client/">
     <Project Path="src/Client/SkyLogg.Client.Core/SkyLogg.Client.Core.csproj" />
     <Project Path="src/Client/SkyLogg.Client.Maui/SkyLogg.Client.Maui.csproj">

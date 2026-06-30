@@ -8,5 +8,5 @@ public interface IFlightImportController : IAppController
     Task<FlightImportPreviewDto> Preview(FlightImportRequestDto request, CancellationToken cancellationToken);
 
     [HttpPost]
-    Task<List<FlightLogDto>> Confirm(FlightImportConfirmDto request, CancellationToken cancellationToken);
+    Task<FlightImportConfirmResultDto> Confirm(FlightImportConfirmDto request, CancellationToken cancellationToken);
 }

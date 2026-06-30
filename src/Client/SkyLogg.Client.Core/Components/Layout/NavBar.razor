@@ -3,10 +3,8 @@
 <section>
     <BitNavBar TItem="BitNavBarOption" Style="width:100%">
 
-        <BitNavBarOption Text="@Localizer[nameof(AppStrings.Home)]" IconName="@BitIconName.Home" Url="@PageUrls.Home" />
-
         <AuthorizeView Policy="@AppFeatures.Logbook.ManageFlightLogs">
-            <BitNavBarOption Text="@Localizer[nameof(AppStrings.Logbook)]" IconName="@BitIconName.AirplaneSolid" Url="@PageUrls.Logbook" />
+            <BitNavBarOption Text="@Localizer[nameof(AppStrings.LogbookDashboard)]" IconName="@BitIconName.ViewDashboard" Url="@PageUrls.Home" />
             <BitNavBarOption Text="@Localizer[nameof(AppStrings.FlightLogs)]" IconName="@BitIconName.List" Url="@PageUrls.FlightLogs" />
         </AuthorizeView>
 

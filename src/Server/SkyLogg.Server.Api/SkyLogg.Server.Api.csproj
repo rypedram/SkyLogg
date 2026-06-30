@@ -42,6 +42,7 @@
         <PackageReference Include="Hangfire.EntityFrameworkCore" />
         <PackageReference Include="HtmlSanitizer" />
         <PackageReference Include="libphonenumber-csharp" />
+        <PackageReference Include="GeoTimeZone" />
         <PackageReference Include="Humanizer" />
         <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" />
         <PackageReference Include="QRCoder" />
@@ -79,6 +80,8 @@
     <ItemGroup>
         <Content Include=".config\dotnet-tools.json" />
         <Content Include="..\..\..\Bit.ResxTranslator.json" Link="Features\Identity\Resources\Bit.ResxTranslator.json" />
+        <ProjectReference Include="..\..\Core\SkyLogg.Application\SkyLogg.Application.csproj" />
+        <ProjectReference Include="..\..\Core\SkyLogg.Infrastructure\SkyLogg.Infrastructure.csproj" />
         <ProjectReference Include="..\SkyLogg.Server.Shared\SkyLogg.Server.Shared.csproj" />
     </ItemGroup>
 

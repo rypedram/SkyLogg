@@ -9,15 +9,7 @@ public partial class MainLayout
 
     private async Task SetNavPanelItems(ClaimsPrincipal authUser)
     {
-        navPanelItems =
-        [
-            new()
-            {
-                Text = localizer[nameof(AppStrings.Home)],
-                IconName = BitIconName.Home,
-                Url = PageUrls.Home,
-            }
-        ];
+        navPanelItems = [];
 
         var (manageAirports, manageAircraft, manageCrew, manageCities, manageCountries, manageTimeZones) = await (
             authorizationService.IsAuthorized(authUser!, AppFeatures.BaseInfo.ManageAirports),
@@ -31,16 +23,17 @@ public partial class MainLayout
         {
             navPanelItems.Add(new()
             {
+                Text = localizer[nameof(AppStrings.LogbookDashboard)],
+                IconName = BitIconName.ViewDashboard,
+                Url = PageUrls.Home,
+            });
+
+            navPanelItems.Add(new()
+            {
                 Text = localizer[nameof(AppStrings.Logbook)],
                 IconName = BitIconName.AirplaneSolid,
                 ChildItems =
                 [
-                    new()
-                    {
-                        Text = localizer[nameof(AppStrings.LogbookDashboard)],
-                        IconName = BitIconName.ViewDashboard,
-                        Url = PageUrls.Logbook,
-                    },
                     new()
                     {
                         Text = localizer[nameof(AppStrings.FlightLogs)],

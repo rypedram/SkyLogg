@@ -1293,6 +1293,20 @@ After reaching {0}, extra sign-ins will have reduced functions.</value>
     <data name="RawImportText" xml:space="preserve"><value>Raw OCR / CSV text</value></data>
     <data name="PreviewImport" xml:space="preserve"><value>Preview Import</value></data>
     <data name="ImportCandidates" xml:space="preserve"><value>Import Candidates</value></data>
+    <data name="ConfirmImport" xml:space="preserve"><value>Confirm Import</value></data>
+    <data name="ImportResolvedAirports" xml:space="preserve"><value>Resolved Airports</value></data>
+    <data name="ImportResolvedAircraftTypes" xml:space="preserve"><value>Resolved Aircraft Types</value></data>
+    <data name="ImportValidationWarnings" xml:space="preserve"><value>Validation warnings</value></data>
+    <data name="ImportNewMasterData" xml:space="preserve"><value>New</value></data>
+    <data name="ImportFlightsSaved" xml:space="preserve"><value>Flights imported successfully.</value></data>
+    <data name="ImportUploadFile" xml:space="preserve"><value>Upload OCR / CSV file</value></data>
+    <data name="ImportOcrNoTextExtracted" xml:space="preserve"><value>No text could be extracted from the uploaded file.</value></data>
+    <data name="ImportNoFlightsRecognized" xml:space="preserve"><value>No flights were recognized in the provided text.</value></data>
+    <data name="ImportDuplicateFlights" xml:space="preserve"><value>{0} duplicate(s)</value></data>
+    <data name="ImportDuplicate" xml:space="preserve"><value>Duplicate</value></data>
+    <data name="ImportFlightsPartialSaved" xml:space="preserve"><value>{0} flights saved. {1} duplicate flights skipped.</value></data>
+    <data name="ImportAllDuplicatesSkipped" xml:space="preserve"><value>All selected flights overlap existing logs. Duplicates are highlighted in red.</value></data>
+    <data name="FlightTime" xml:space="preserve"><value>Flight Time</value></data>
     <data name="Confidence" xml:space="preserve"><value>Confidence</value></data>
     <data name="Routes" xml:space="preserve"><value>Routes</value></data>
     <data name="VisitedCountries" xml:space="preserve"><value>Visited Countries</value></data>

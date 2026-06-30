@@ -1,0 +1,20 @@
+<Project>
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+
+    <!-- Core Clean Architecture projects must not inherit Bit Platform global usings or analyzers. -->
+    <ItemGroup>
+        <Using Remove="SkyLogg" />
+        <Using Remove="SkyLogg.Shared" />
+        <Using Remove="SkyLogg.Shared.Resources" />
+        <Using Remove="SkyLogg.Shared.Infrastructure.Dtos" />
+        <Using Remove="SkyLogg.Shared.Infrastructure.Services" />
+        <Using Remove="SkyLogg.Shared.Infrastructure.Exceptions" />
+        <Using Remove="SkyLogg.Shared.Infrastructure.Attributes" />
+        <Using Remove="SkyLogg.Shared.Infrastructure.Services.Contracts" />
+        <Using Remove="Microsoft.Extensions.Localization" />
+        <PackageReference Remove="Bit.CodeAnalyzers" />
+        <PackageReference Remove="Bit.SourceGenerators" />
+    </ItemGroup>
+</Project>

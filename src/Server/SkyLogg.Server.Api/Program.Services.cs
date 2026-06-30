@@ -30,7 +30,11 @@ using SkyLogg.Server.Api.Features.PushNotification;
 using SkyLogg.Server.Api.Infrastructure.Services;
 using SkyLogg.Server.Api.Features.Logbook;
 using FluentValidation;
+using SkyLogg.Server.Api.Features.Logbook.Import;
+using SkyLogg.Server.Api.Features.Logbook.Import.OurAirports;
 using SkyLogg.Shared.Features.Logbook;
+using SkyLogg.Application;
+using SkyLogg.Infrastructure;
 
 namespace SkyLogg.Server.Api;
 
@@ -210,14 +214,29 @@ public static partial class Program
         }
 
         services.AddValidatorsFromAssemblyContaining<FlightLogDtoValidator>();
+        services.AddApplication();
+        services.AddInfrastructure();
+        services.AddHttpContextAccessor();
+        services.AddScoped<SkyLogg.Application.Common.Interfaces.ICurrentUserAccessor, HttpContextCurrentUserAccessor>();
         services.AddScoped<IFlightTimeCalculator, FlightTimeCalculator>();
         services.AddScoped<FlightLogService>();
         services.AddScoped<LogbookAnalyticsService>();
         services.AddScoped<FlightLogExportService>();
         services.AddScoped<FlightMapService>();
         services.AddScoped<FlightReportsService>();
-        services.AddScoped<IFlightOcrExtractionService, PlaceholderFlightOcrExtractionService>();
+        services.AddScoped<IFlightOcrExtractionService, FlightOcrExtractionService>();
         services.AddScoped<IAiFlightExtractionService, RuleBasedFlightExtractionService>();
+        services.AddHttpClient("OurAirports", c =>
+        {
+            c.Timeout = TimeSpan.FromMinutes(5);
+            c.DefaultRequestHeaders.UserAgent.ParseAdd("SkyLogg/1.0 (+https://github.com/skylogg)");
+        });
+        services.AddSingleton<OurAirportsCatalog>();
+        services.AddHostedService<OurAirportsCatalogWarmupService>();
+        services.AddScoped<IExternalAviationDataProvider, OurAirportsAviationDataProvider>();
+        services.AddScoped<IAirportResolutionService, AirportResolutionService>();
+        services.AddScoped<IAircraftTypeResolutionService, AircraftTypeResolutionService>();
+        services.AddScoped<IFlightImportPipelineService, FlightImportPipelineService>();
 
         // Offline sync stub — full Datasync integration planned for a future module.
         services.AddDatasyncServices();

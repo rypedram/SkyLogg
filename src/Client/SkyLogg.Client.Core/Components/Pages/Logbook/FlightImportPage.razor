@@ -10,7 +10,13 @@
 <LogbookWorkspace>
     <LogbookSection Title="@Localizer[nameof(AppStrings.FlightImport)]">
         <BitText Typography="BitTypography.Body2">
-            Paste OCR or raw text — one flight per line: date, aircraft, departure, arrival, block off, takeoff, landing, block on, remarks.
+            Paste OCR text or upload a file. Supported formats: CSV lines, structured OCR blocks, text, and PDF.
+        </BitText>
+        <InputFile OnChange="OnImportFileSelected"
+                   accept=".txt,.csv,.pdf,image/*"
+                   class="import-file-input" />
+        <BitText Typography="BitTypography.Caption1">
+            @Localizer[nameof(AppStrings.ImportUploadFile)]
         </BitText>
         <BitTextField @bind-Value="rawText"
                       Multiline
@@ -18,7 +24,7 @@
                       Label="@Localizer[nameof(AppStrings.RawImportText)]" />
         <BitButton Color="BitColor.Primary"
                    IconName="@BitIconName.Preview"
-                   IsLoading="isPreviewing"
+                   IsLoading="isPreviewing || isUploading"
                    OnClick="WrapHandled(PreviewImport)">
             @Localizer[nameof(AppStrings.PreviewImport)]
         </BitButton>
@@ -26,6 +32,72 @@
 
     @if (preview is not null)
     {
+        @if (preview.ResolvedAirports.Count > 0)
+        {
+            <LogbookSection Title="@Localizer[nameof(AppStrings.ImportResolvedAirports)]">
+                <div class="data-table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ICAO</th>
+                                <th>@Localizer[nameof(AppStrings.Airports)]</th>
+                                <th>@Localizer[nameof(AppStrings.Country)]</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var airport in preview.ResolvedAirports)
+                            {
+                                <tr>
+                                    <td class="primary-cell">@airport.Icao</td>
+                                    <td>@airport.Name</td>
+                                    <td class="secondary-cell">@airport.Country</td>
+                                    <td>
+                                        @if (airport.WasCreated)
+                                        {
+                                            <BitLabel Color="BitColor.Success">@Localizer[nameof(AppStrings.ImportNewMasterData)]</BitLabel>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </LogbookSection>
+        }
+
+        @if (preview.ResolvedAircraftTypes.Count > 0)
+        {
+            <LogbookSection Title="@Localizer[nameof(AppStrings.ImportResolvedAircraftTypes)]">
+                <div class="data-table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>@Localizer[nameof(AppStrings.AircraftType)]</th>
+                                <th>@Localizer[nameof(AppStrings.AircraftModel)]</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var type in preview.ResolvedAircraftTypes)
+                            {
+                                <tr>
+                                    <td class="primary-cell">@type.Manufacturer @type.Model (@type.TypeCode)</td>
+                                    <td class="secondary-cell">@type.Category</td>
+                                    <td>
+                                        @if (type.WasCreated)
+                                        {
+                                            <BitLabel Color="BitColor.Success">@Localizer[nameof(AppStrings.ImportNewMasterData)]</BitLabel>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </LogbookSection>
+        }
+
         <LogbookSection Title="@Localizer[nameof(AppStrings.ImportCandidates)]">
             @if (preview.Candidates.Count == 0)
             {
@@ -33,31 +105,92 @@
             }
             else
             {
+                <BitText Typography="BitTypography.Body2">
+                    @preview.ValidCount valid · @preview.InvalidCount need review
+                    @if (preview.DuplicateCount > 0)
+                    {
+                        <span class="import-duplicate-label"> · @string.Format(Localizer[nameof(AppStrings.ImportDuplicateFlights)], preview.DuplicateCount)</span>
+                    }
+                </BitText>
                 <div class="data-table-wrap">
                     <table class="data-table">
                         <thead>
                             <tr>
+                                <th></th>
                                 <th>@Localizer[nameof(AppStrings.FlightDate)]</th>
                                 <th>@Localizer[nameof(AppStrings.Aircraft)]</th>
                                 <th>@Localizer[nameof(AppStrings.Route)]</th>
                                 <th>@Localizer[nameof(AppStrings.BlockTime)]</th>
+                                <th>@Localizer[nameof(AppStrings.FlightTime)]</th>
                                 <th>@Localizer[nameof(AppStrings.Confidence)]</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var candidate in preview.Candidates)
                             {
-                                <tr>
+                                <tr class="@GetRowClass(candidate)">
+                                    <td>
+                                        <BitCheckbox @bind-Value="candidate.IsSelected"
+                                                     IsEnabled="candidate.IsValid && candidate.IsDuplicate is false" />
+                                    </td>
                                     <td>@(candidate.FlightDate?.ToString("d") ?? "—")</td>
-                                    <td class="primary-cell">@candidate.AircraftRegistration</td>
+                                    <td class="primary-cell">@(candidate.AircraftType ?? candidate.AircraftRegistration)</td>
                                     <td class="secondary-cell">@candidate.DepartureAirportCode → @candidate.ArrivalAirportCode</td>
-                                    <td class="secondary-cell">@candidate.BlockOff / @candidate.BlockOn</td>
-                                    <td>@candidate.Confidence.ToString("P0")</td>
+                                    <td class="secondary-cell">
+                                        @if (candidate.BlockTimeMinutes.HasValue)
+                                        {
+                                            @FlightTimeFormatting.FormatMinutes(candidate.BlockTimeMinutes.Value)
+                                        }
+                                        else
+                                        {
+                                            <text>@candidate.BlockOff / @candidate.BlockOn</text>
+                                        }
+                                    </td>
+                                    <td class="secondary-cell">
+                                        @(candidate.FlightTimeMinutes.HasValue ? FlightTimeFormatting.FormatMinutes(candidate.FlightTimeMinutes.Value) : "—")
+                                    </td>
+                                    <td>
+                                        <BitLabel Color="ConfidenceColor(candidate.Confidence)">
+                                            @candidate.Confidence.ToString("P0")
+                                        </BitLabel>
+                                    </td>
+                                    <td>
+                                        @if (candidate.IsDuplicate)
+                                        {
+                                            <BitLabel Color="BitColor.Error">@Localizer[nameof(AppStrings.ImportDuplicate)]</BitLabel>
+                                        }
+                                        else
+                                        {
+                                            <BitLabel Color="ValidityColor(candidate.IsValid)">
+                                                @(candidate.IsValid ? "OK" : "Review")
+                                            </BitLabel>
+                                        }
+                                    </td>
                                 </tr>
+                                @if (candidate.ValidationWarnings.Count > 0)
+                                {
+                                    <tr class="@GetRowClass(candidate)">
+                                        <td colspan="8">
+                                            <BitMessage Color="@(candidate.IsDuplicate ? BitColor.Error : BitColor.Warning)" Multiline>
+                                                <strong>@Localizer[nameof(AppStrings.ImportValidationWarnings)]:</strong>
+                                                @string.Join(" · ", candidate.ValidationWarnings)
+                                            </BitMessage>
+                                        </td>
+                                    </tr>
+                                }
                             }
                         </tbody>
                     </table>
                 </div>
+
+                <BitButton Color="BitColor.Primary"
+                           IconName="@BitIconName.CheckMark"
+                           IsEnabled="SelectedCandidates.Any()"
+                           IsLoading="isConfirming"
+                           OnClick="WrapHandled(ConfirmImport)">
+                    @Localizer[nameof(AppStrings.ConfirmImport)] (@SelectedCandidates.Count())
+                </BitButton>
             }
         </LogbookSection>
     }

@@ -89,11 +89,9 @@ public partial class FlightLogService
         dto.TotalLandings = dto.Sectors.Sum(s => s.DayLandings + s.NightLandings);
     }
 
-    private async Task EnsureNoAircraftOverlapAsync(FlightLogDto dto, Guid? excludeFlightLogId, CancellationToken cancellationToken)
+    public async Task<bool> HasAircraftOverlapAsync(FlightLogDto dto, Guid? excludeFlightLogId, CancellationToken cancellationToken)
     {
-        var sectors = dto.Sectors;
-
-        foreach (var sector in sectors)
+        foreach (var sector in dto.Sectors)
         {
             var overlapping = await dbContext.FlightSectors
                 .Include(s => s.FlightLog)
@@ -106,8 +104,16 @@ public partial class FlightLogService
                 .AnyAsync(cancellationToken);
 
             if (overlapping)
-                throw new ConflictException(localizer[nameof(AppStrings.FlightLogOverlapConflict)]);
+                return true;
         }
+
+        return false;
+    }
+
+    private async Task EnsureNoAircraftOverlapAsync(FlightLogDto dto, Guid? excludeFlightLogId, CancellationToken cancellationToken)
+    {
+        if (await HasAircraftOverlapAsync(dto, excludeFlightLogId, cancellationToken))
+            throw new ConflictException(localizer[nameof(AppStrings.FlightLogOverlapConflict)]);
     }
 
     public void ApplyToEntity(FlightLog entity, FlightLogDto dto, Guid userId)

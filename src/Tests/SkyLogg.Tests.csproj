@@ -17,6 +17,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Core\SkyLogg.Application\SkyLogg.Application.csproj" />
+        <ProjectReference Include="..\Core\SkyLogg.Domain\SkyLogg.Domain.csproj" />
         <ProjectReference Include="..\Server\SkyLogg.Server.Web\SkyLogg.Server.Web.csproj" />
         <ProjectReference Include="..\Server\SkyLogg.Server.Api\SkyLogg.Server.Api.csproj" />
         <ProjectReference Include="..\Server\SkyLogg.Server.AppHost\SkyLogg.Server.AppHost.csproj" />

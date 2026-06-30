@@ -1,0 +1,13 @@
+@import '../../../Styles/abstracts/_bit-css-variables.scss';
+
+.import-row-duplicate {
+    td {
+        color: $bit-color-error;
+        background-color: $bit-color-error-light;
+    }
+}
+
+.import-duplicate-label {
+    color: $bit-color-error;
+    font-weight: 600;
+}
