@@ -34,6 +34,9 @@ public partial class FlightLogService
         if (ownedCrewCount != crewIds.Length)
             throw new BadRequestException(localizer[nameof(AppStrings.CrewMemberCouldNotBeFound)]);
 
+        if (crewIds.Length != dto.Crew.Count)
+            throw new BadRequestException(localizer[nameof(AppStrings.DuplicateCrewMemberOnFlight)]);
+
         for (var i = 0; i < dto.Sectors.Count; i++)
         {
             var sector = dto.Sectors[i];
@@ -123,43 +126,83 @@ public partial class FlightLogService
         entity.TotalLandings = dto.TotalLandings;
         entity.UpdatedAt = DateTimeOffset.UtcNow;
 
-        entity.Sectors.Clear();
-        foreach (var sectorDto in dto.Sectors.OrderBy(s => s.SectorOrder))
-        {
-            entity.Sectors.Add(new FlightSector
-            {
-                Id = sectorDto.Id ?? Guid.NewGuid(),
-                SectorOrder = sectorDto.SectorOrder,
-                DepartureAirportId = sectorDto.DepartureAirportId,
-                ArrivalAirportId = sectorDto.ArrivalAirportId,
-                BlockOff = sectorDto.BlockOff.ToUniversalTime(),
-                BlockOn = sectorDto.BlockOn.ToUniversalTime(),
-                Takeoff = sectorDto.Takeoff?.ToUniversalTime(),
-                Landing = sectorDto.Landing?.ToUniversalTime(),
-                BlockTimeMinutes = sectorDto.BlockTimeMinutes,
-                FlightTimeMinutes = sectorDto.FlightTimeMinutes,
-                PicTimeMinutes = sectorDto.PicTimeMinutes,
-                SicTimeMinutes = sectorDto.SicTimeMinutes,
-                DualTimeMinutes = sectorDto.DualTimeMinutes,
-                NightTimeMinutes = sectorDto.NightTimeMinutes,
-                IfrTimeMinutes = sectorDto.IfrTimeMinutes,
-                IsIfr = sectorDto.IsIfr,
-                IsNight = sectorDto.IsNight,
-                DayTakeoffs = sectorDto.DayTakeoffs,
-                NightTakeoffs = sectorDto.NightTakeoffs,
-                DayLandings = sectorDto.DayLandings,
-                NightLandings = sectorDto.NightLandings,
-            });
-        }
+        SyncSectors(entity, dto);
+        SyncCrewAssignments(entity, dto);
+    }
 
-        entity.CrewAssignments.Clear();
+    private static void SyncSectors(FlightLog entity, FlightLogDto dto)
+    {
+        var sectorDtos = dto.Sectors.OrderBy(s => s.SectorOrder).ToList();
+        var dtoSectorIds = sectorDtos
+            .Where(s => s.Id.HasValue)
+            .Select(s => s.Id!.Value)
+            .ToHashSet();
+
+        foreach (var sector in entity.Sectors.Where(s => !dtoSectorIds.Contains(s.Id)).ToList())
+            entity.Sectors.Remove(sector);
+
+        foreach (var sectorDto in sectorDtos)
+        {
+            var sector = sectorDto.Id.HasValue
+                ? entity.Sectors.FirstOrDefault(s => s.Id == sectorDto.Id.Value)
+                : null;
+
+            if (sector is null)
+            {
+                sector = new FlightSector { Id = sectorDto.Id ?? Guid.NewGuid() };
+                entity.Sectors.Add(sector);
+            }
+
+            ApplySector(sector, sectorDto);
+        }
+    }
+
+    private static void ApplySector(FlightSector sector, FlightSectorDto sectorDto)
+    {
+        sector.SectorOrder = sectorDto.SectorOrder;
+        sector.DepartureAirportId = sectorDto.DepartureAirportId;
+        sector.ArrivalAirportId = sectorDto.ArrivalAirportId;
+        sector.BlockOff = sectorDto.BlockOff.ToUniversalTime();
+        sector.BlockOn = sectorDto.BlockOn.ToUniversalTime();
+        sector.Takeoff = sectorDto.Takeoff?.ToUniversalTime();
+        sector.Landing = sectorDto.Landing?.ToUniversalTime();
+        sector.BlockTimeMinutes = sectorDto.BlockTimeMinutes;
+        sector.FlightTimeMinutes = sectorDto.FlightTimeMinutes;
+        sector.PicTimeMinutes = sectorDto.PicTimeMinutes;
+        sector.SicTimeMinutes = sectorDto.SicTimeMinutes;
+        sector.DualTimeMinutes = sectorDto.DualTimeMinutes;
+        sector.NightTimeMinutes = sectorDto.NightTimeMinutes;
+        sector.IfrTimeMinutes = sectorDto.IfrTimeMinutes;
+        sector.IsIfr = sectorDto.IsIfr;
+        sector.IsNight = sectorDto.IsNight;
+        sector.DayTakeoffs = sectorDto.DayTakeoffs;
+        sector.NightTakeoffs = sectorDto.NightTakeoffs;
+        sector.DayLandings = sectorDto.DayLandings;
+        sector.NightLandings = sectorDto.NightLandings;
+    }
+
+    private static void SyncCrewAssignments(FlightLog entity, FlightLogDto dto)
+    {
+        var crewMemberIds = dto.Crew.Select(c => c.CrewMemberId).ToHashSet();
+
+        foreach (var assignment in entity.CrewAssignments.Where(c => !crewMemberIds.Contains(c.CrewMemberId)).ToList())
+            entity.CrewAssignments.Remove(assignment);
+
         foreach (var crewDto in dto.Crew)
         {
-            entity.CrewAssignments.Add(new FlightLogCrew
+            var assignment = entity.CrewAssignments.FirstOrDefault(c => c.CrewMemberId == crewDto.CrewMemberId);
+            if (assignment is null)
             {
-                CrewMemberId = crewDto.CrewMemberId,
-                RoleType = crewDto.RoleType,
-            });
+                entity.CrewAssignments.Add(new FlightLogCrew
+                {
+                    CrewMemberId = crewDto.CrewMemberId,
+                    RoleType = crewDto.RoleType,
+                });
+            }
+            else
+            {
+                assignment.RoleType = crewDto.RoleType;
+            }
         }
     }
 }

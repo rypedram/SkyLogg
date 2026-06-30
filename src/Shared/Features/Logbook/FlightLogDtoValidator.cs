@@ -56,6 +56,9 @@ public class FlightLogDtoValidator : AbstractValidator<FlightLogDto>
         {
             crew.RuleFor(c => c.CrewMemberId).NotEmpty();
         });
+        RuleFor(f => f.Crew)
+            .Must(crew => crew.Select(c => c.CrewMemberId).Distinct().Count() == crew.Count)
+            .WithMessage(nameof(AppStrings.DuplicateCrewMemberOnFlight));
         RuleFor(f => f.Remarks).MaximumLength(2000);
     }
 }

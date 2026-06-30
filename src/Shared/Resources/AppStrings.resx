@@ -1451,6 +1451,7 @@ After reaching {0}, extra sign-ins will have reduced functions.</value>
     <data name="AirportIcaoAlreadyExists" xml:space="preserve"><value>An airport with this ICAO already exists.</value></data>
     <data name="InvalidAirportCoordinates" xml:space="preserve"><value>Airport latitude or longitude is outside the valid range.</value></data>
     <data name="CrewMemberCouldNotBeFound" xml:space="preserve"><value>Crew member could not be found.</value></data>
+    <data name="DuplicateCrewMemberOnFlight" xml:space="preserve"><value>Each crew member can only be assigned once per flight.</value></data>
     <data name="AircraftMustBeActive" xml:space="preserve"><value>Aircraft must be active.</value></data>
     <data name="FlightLogOverlapConflict" xml:space="preserve"><value>This aircraft has an overlapping flight log.</value></data>
     <data name="FlightLogRequiresSector" xml:space="preserve"><value>At least one sector is required.</value></data>
